@@ -1,18 +1,85 @@
 import React from "react";
-import ReactDOM from "react-dom/client";
-import "./index.css";
-import App from "./App";
-import reportWebVitals from "./reportWebVitals";
+import ReactDOM from "react-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+
+import AddCsv from "./Components/superAdmin/addcsv";
 import "bootstrap/dist/css/bootstrap.min.css";
+import PropertyDetails from "./Components/users/PropertyDetails";
+import UserLogin from "./Components/users/user_Login";
+import ViewPropertyDetails from "./Components/superAdmin/ViewPropertyDetails";
+import AdminLogin from "./Components/admin/admin_Login";
+import Users from "./Components/admin/users";
+import Dashboard from "./Components/admin/dashboard";
+import AssignTask from "./Components/admin/AssignTask";
+import ViewTask from "./Components/admin/viewTask";
+import ViewSurvey from "./Components/admin/survey_Data";
 
-const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(
+// Function to check if the user is logged in
+const isUserLoggedIn = () => {
+  return localStorage.getItem("user_token") !== null;
+};
+
+const isAdminLoggedIn = () => {
+  return localStorage.getItem("admin_token") !== null;
+};
+
+const isSuperAdminLoggedIn = () => {
+  return localStorage.getItem("super_admin_token") !== null;
+};
+
+// Function to render routes based on login status
+const renderRoutes = () => {
+  if (isSuperAdminLoggedIn()) {
+    return (
+      <Routes>
+        <Route
+          path="/"
+          element={<Navigate replace to="viewbuildingdetails" />}
+        />
+        <Route path="/addcsv" element={<AddCsv />} />
+        <Route path="/viewbuildingdetails" element={<ViewPropertyDetails />} />
+        <Route
+          path="*"
+          element={<Navigate to="/viewbuildingdetails" replace />}
+        />
+      </Routes>
+    );
+  } else if (isAdminLoggedIn()) {
+    return (
+      <Routes>
+        <Route path="/" element={<Navigate replace to="dashboard" />} />
+        <Route path="/dashboard" element={<Dashboard />}>
+          <Route index element={<Navigate replace to="users" />} />
+          <Route path="users" element={<Users />} />
+        </Route>
+        <Route path="/assignTask/:user_id" element={<AssignTask />} />
+        <Route path="/viewTask/:user_id" element={<ViewTask />} />
+        <Route path="/viewSurvey/:user_id" element={<ViewSurvey />} />
+      </Routes>
+    );
+  } else if (isUserLoggedIn()) {
+    return (
+      <Routes>
+        <Route path="/" element={<Navigate replace to="prop_details" />} />
+        <Route path="/prop_details" element={<PropertyDetails />} />
+        <Route path="*" element={<Navigate to="/prop_details" replace />} />
+      </Routes>
+    );
+  } else {
+    return (
+      <Routes>
+        <Route path="/" element={<UserLogin />} />
+        <Route path="/user_login" element={<UserLogin />} />
+        <Route path="/admin_login" element={<AdminLogin />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    );
+  }
+};
+
+ReactDOM.render(
   <React.StrictMode>
-    <App />
-  </React.StrictMode>
+    <BrowserRouter>{renderRoutes()}</BrowserRouter>
+  </React.StrictMode>,
+  document.getElementById("root")
 );
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();

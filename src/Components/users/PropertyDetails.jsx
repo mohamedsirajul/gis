@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
-import "./App.css";
+import "./PropertyDetails.css";
 import { Container, Row, Col } from "react-bootstrap";
+import { message } from "antd";
+import { useNavigate } from "react-router-dom";
+
 import {
   AppBar,
   Toolbar,
@@ -21,9 +24,13 @@ import {
   Stepper,
   Step,
   StepLabel,
+  CircularProgress,
+  Snackbar,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
+import MuiAlert from "@mui/material/Alert";
+// const navigate = useNavigate();
 
 const buildingTypeOptions = [
   "Super Structure",
@@ -61,17 +68,20 @@ const PROPERTY_OWNERSHIP = [
   "Vacant Land",
 ];
 
-const PROPERTY_TYPE = [
+const FloorusageOptions = [
   "Mixed",
   "Residential",
   "Commercial",
   "Others",
   "Vacant Land",
 ];
+const NoOfFloor = [-2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
-function App() {
+const FloorOccupancy = ["Owner", "Tenent"];
+function PropertyDetails() {
   const [activeStep, setActiveStep] = useState(0);
   const [data, setData] = useState([]);
+  const navigate = useNavigate();
 
   const [wardOptions, setWardOptions] = useState([]);
   const [streetOptions, setStreetOptions] = useState([]);
@@ -105,6 +115,9 @@ function App() {
   const [pinCode, setPinCode] = useState("");
 
   //Floor Information
+  const [tradeDataOption, settradeData] = useState([]);
+  const [searchInput, setSearchInput] = useState("");
+  const [filteredOptions, setFilteredOptions] = useState([]);
   const [floorInformation, setFloorInformation] = useState([
     {
       id: 1,
@@ -128,6 +141,11 @@ function App() {
   const [oht, setOht] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
 
+  //loadiing
+  const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [openSnackbar, setOpenSnackbar] = useState(false);
   const steps = [
     "Location Details",
     "Property Info",
@@ -174,6 +192,25 @@ function App() {
     setFloorInformation(updatedFloorInfo);
   };
 
+  const handleUsageChange = (id, e) => {
+    const { value } = e.target;
+    const updatedFloors = floorInformation.map((floor) =>
+      floor.id === id ? { ...floor, usage: value } : floor
+    );
+    setFloorInformation(updatedFloors);
+  };
+
+  const filterOptions = (inputValue) => {
+    if (inputValue.trim() === "") {
+      setFilteredOptions(tradeDataOption);
+    } else {
+      const filtered = tradeDataOption.filter((option) =>
+        option.toLowerCase().includes(inputValue.toLowerCase())
+      );
+      setFilteredOptions(filtered);
+    }
+  };
+
   const deleteFloorInformation = (id) => {
     const updatedFloorInfo = floorInformation.filter((item) => item.id !== id);
     setFloorInformation(updatedFloorInfo);
@@ -206,12 +243,33 @@ function App() {
   }, [selectedBillNo]);
 
   useEffect(() => {
-    fetch("https://luisnellai.xyz/siraj/getproperty.php")
+    fetch("https://luisnellai.xyz/siraj/admin/get_assigned_task.php/1")
       .then((response) => response.json())
       .then((data) => {
         setData(data);
         const uniqueWards = [...new Set(data.map((item) => item.WardName))];
         setWardOptions(uniqueWards);
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+      });
+  }, []);
+
+  useEffect(() => {
+    fetch("https://luisnellai.xyz/siraj/get_trade.php")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.json();
+      })
+      .then((trade_data) => {
+        // console.log(trade_data);
+        const descriptions = trade_data.map((item) => item.description);
+        settradeData(descriptions);
+        setFilteredOptions(descriptions); // Initialize filtered options with all options
+
+        // console.log(descriptions);
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
@@ -243,41 +301,47 @@ function App() {
     switch (activeStep) {
       case 0:
         return selectedStreet !== "" && selectedWard !== "";
+      // case 1:
+      //   return (
+      //     selectedBillNo !== "" &&
+      //     selectedBuildingUsedAs !== "" &&
+      //     selectedPROPERTY_OWNERSHIP !== "" &&
+      //     Gisid !== "" &&
+      //     selectedbuildingTypeOptions !== "" &&
+      //     selectedDoorNo !== "" &&
+      //     selectedOwner !== "" &&
+      //     selectedAreaofplot !== "" &&
+      //     selectedMobile !== "" &&
+      //     BuildingName !== "" &&
+      //     TotalFloor !== ""
+      //   );
+      // case 2:
+      //   return (
+      //     address1 !== "" &&
+      //     address2 !== "" &&
+      //     area !== "" &&
+      //     location !== "" &&
+      //     city !== "" &&
+      //     state !== "" &&
+      //     pinCode !== ""
+      //   );
+      // case 3:
+      //   return floorInformation.every(
+      //     (floor) =>
+      //       floor.floor !== "" &&
+      //       floor.area !== "" &&
+      //       floor.usage !== "" &&
+      //       floor.occupancy !== "" &&
+      //       floor.flatNo !== "" &&
+      //       floor.establishment !== "" &&
+      //       floor.establishmentName !== ""
+      //   );
       case 1:
-        return (
-          selectedBillNo !== "" &&
-          selectedBuildingUsedAs !== "" &&
-          selectedPROPERTY_OWNERSHIP !== "" &&
-          Gisid !== "" &&
-          selectedbuildingTypeOptions !== "" &&
-          selectedDoorNo !== "" &&
-          selectedOwner !== "" &&
-          selectedAreaofplot !== "" &&
-          selectedMobile !== "" &&
-          BuildingName !== "" &&
-          TotalFloor !== ""
-        );
+        return true;
       case 2:
-        return (
-          address1 !== "" &&
-          address2 !== "" &&
-          area !== "" &&
-          location !== "" &&
-          city !== "" &&
-          state !== "" &&
-          pinCode !== ""
-        );
+        return true;
       case 3:
-        return floorInformation.every(
-          (floor) =>
-            floor.floor !== "" &&
-            floor.area !== "" &&
-            floor.usage !== "" &&
-            floor.occupancy !== "" &&
-            floor.flatNo !== "" &&
-            floor.establishment !== "" &&
-            floor.establishmentName !== ""
-        );
+        return true;
       case 4:
         return true; // No validation needed for Facility Details
       default:
@@ -287,107 +351,14 @@ function App() {
 
   //click submit
 
-  // const handleSubmit = () => {
-  //   const formData = {
-  //     selectedWard,
-  //     selectedStreet,
-  //     selectedBillNo,
-  //     selectedDoorNo,
-  //     Gisid,
-  //     selectedOwner,
-  //     BuildingName,
-  //     TotalFloor,
-  //     selectedAreaofplot,
-  //     selectedMobile,
-  //     selectedBuildingUsedAs,
-  //     selectedPROPERTY_OWNERSHIP,
-  //     selectedbuildingTypeOptions,
-  //     address1,
-  //     address2,
-  //     area,
-  //     location,
-  //     city,
-  //     state,
-  //     pinCode,
-  //     floorInformation,
-  //     selectedHoarding,
-  //     selectedMobileTower,
-  //     headRooms,
-  //     liftRooms,
-  //     parking,
-  //     ramp,
-  //     oht,
-  //     selectedFile,
-  //   };
-
-  //   console.log("Form Data:", formData);
-  // };
-
-  // const handleSubmit = async () => {
-  //   // Create a FormData object to send mixed content (JSON + file)
-  //   const formData = new FormData();
-
-  //   // Append JSON data to FormData
-  //   formData.append(
-  //     "jsonData",
-  //     JSON.stringify({
-  //       BuildingName,
-  //       Gisid,
-  //       TotalFloor,
-  //       address1,
-  //       address2,
-  //       area,
-  //       city,
-  //       floorInformation,
-  //       headRooms,
-  //       liftRooms,
-  //       location,
-  //       oht,
-  //       parking,
-  //       pinCode,
-  //       ramp,
-  //       selectedAreaofplot,
-  //       selectedBillNo,
-  //       selectedBuildingUsedAs,
-  //       selectedDoorNo,
-  //       selectedHoarding,
-  //       selectedMobile,
-  //       selectedMobileTower,
-  //       selectedOwner,
-  //       selectedPROPERTY_OWNERSHIP,
-  //       selectedStreet,
-  //       selectedWard,
-  //       selectedbuildingTypeOptions,
-  //       state,
-  //     })
-  //   );
-
-  //   // Append selectedFile (if present) to FormData
-  //   if (selectedFile) {
-  //     formData.append("selectedFile", selectedFile);
-  //   }
-
-  //   console.log(formData);
-
-  //   try {
-  //     const response = await fetch(
-  //       "https://luisnellai.xyz/siraj/postbuildingdata.php",
-  //       {
-  //         method: "POST",
-  //         body: formData, // Pass FormData object as body
-  //       }
-  //     );
-
-  //     const result = await response.json();
-  //     console.log("Response:", result);
-  //   } catch (error) {
-  //     console.error("Error:", error);
-  //   }
-  // };
   const handleSubmit = async () => {
+    setLoading(true); // Set loading to true when the form submission starts
+
     const formData = new FormData();
 
+    let user_id = 2;
     const jsonData = {
+      user_id,
       BuildingName,
       Gisid,
       TotalFloor,
@@ -421,6 +392,20 @@ function App() {
     formData.append("jsonData", JSON.stringify(jsonData));
     formData.append("selectedFile", selectedFile);
 
+    // try {
+    //   const response = await fetch(
+    //     "https://luisnellai.xyz/siraj/postbuildingdata.php",
+    //     {
+    //       method: "POST",
+    //       body: formData,
+    //     }
+    //   );
+
+    //   const result = await response.json();
+    //   console.log("Response:", result);
+    // } catch (error) {
+    //   console.error("Error:", error);
+    // }
     try {
       const response = await fetch(
         "https://luisnellai.xyz/siraj/postbuildingdata.php",
@@ -432,16 +417,47 @@ function App() {
 
       const result = await response.json();
       console.log("Response:", result);
+
+      if (response.ok) {
+        setSuccessMessage("Building data submitted successfully!");
+        setErrorMessage(""); // Clear any previous error message
+      } else {
+        setErrorMessage("Failed to submit building data. Please try again.");
+        setSuccessMessage(""); // Clear any previous success message
+      }
     } catch (error) {
       console.error("Error:", error);
+      setErrorMessage("An error occurred while submitting building data.");
+      setSuccessMessage(""); // Clear any previous success message
+    } finally {
+      setLoading(false); // Set loading to false when the form submission ends
+      setOpenSnackbar(true); // Open the snackbar to display message
     }
+  };
+
+  const handleCloseSnackbar = () => {
+    setOpenSnackbar(false);
+  };
+  const onLogOut = async () => {
+    message.success("Logged out", 5);
+    localStorage.removeItem("user_token");
+
+    window.location.href = "/user_login";
+
+    // window.href = "/user_login";
   };
 
   return (
     <div>
       <AppBar position="static">
         <Toolbar>
-          <Typography variant="h6">GIS</Typography>
+          <Typography variant="h6">PROPERTY INFORMATION</Typography>
+          <Button
+            style={{ color: "white", marginLeft: "auto" }}
+            onClick={onLogOut}
+          >
+            Logout
+          </Button>
         </Toolbar>
       </AppBar>
 
@@ -455,7 +471,7 @@ function App() {
         </Stepper> */}
 
         <Row>
-          <Col style={{ marginTop: "2%" }}>
+          <Col style={{ marginTop: "4%" }}>
             <Stepper activeStep={activeStep} alternativeLabel>
               {steps.map((label) => (
                 <Step key={label}>
@@ -785,7 +801,7 @@ function App() {
           <Paper elevation={3} style={{ padding: "20px", margin: "20px 0" }}>
             <Typography variant="h5">Floor Information</Typography>
             <Box mt={3}>
-              {floorInformation.map((floor) => (
+              {floorInformation.map((floor, index) => (
                 <Paper
                   key={floor.id}
                   elevation={3}
@@ -794,13 +810,27 @@ function App() {
                   <Row>
                     <Col md={6}>
                       <FormControl fullWidth className="mt-3">
-                        <TextField
+                        {/* <TextField
                           label="Floor"
                           name="floor"
                           variant="outlined"
                           value={floor.floor}
                           onChange={(e) => handleFloorChange(floor.id, e)}
-                        />
+                        /> */}
+                        <InputLabel>Floor</InputLabel>
+                        <Select
+                          label="Floor"
+                          name="floor"
+                          variant="outlined"
+                          value={floor.floor}
+                          onChange={(e) => handleFloorChange(floor.id, e)}
+                        >
+                          {NoOfFloor.map((option) => (
+                            <MenuItem key={option} value={option}>
+                              {option}
+                            </MenuItem>
+                          ))}
+                        </Select>
                       </FormControl>
                     </Col>
                     <Col md={6}>
@@ -818,24 +848,52 @@ function App() {
                   <Row className="mt-3">
                     <Col md={6}>
                       <FormControl fullWidth className="mt-3">
-                        <TextField
+                        {/* <TextField
                           label="Usage"
                           name="usage"
                           variant="outlined"
                           value={floor.usage}
                           onChange={(e) => handleFloorChange(floor.id, e)}
-                        />
+                        /> */}
+                        <InputLabel>Usage</InputLabel>
+                        <Select
+                          label="Usage"
+                          name="usage"
+                          variant="outlined"
+                          value={floor.usage}
+                          onChange={(e) => handleUsageChange(floor.id, e)}
+                        >
+                          {FloorusageOptions.map((option) => (
+                            <MenuItem key={option} value={option}>
+                              {option}
+                            </MenuItem>
+                          ))}
+                        </Select>
                       </FormControl>
                     </Col>
                     <Col md={6}>
                       <FormControl fullWidth className="mt-3">
-                        <TextField
+                        {/* <TextField
                           label="Occupancy"
                           name="occupancy"
                           variant="outlined"
                           value={floor.occupancy}
                           onChange={(e) => handleFloorChange(floor.id, e)}
-                        />
+                        /> */}
+                        <InputLabel>Occupancy</InputLabel>
+                        <Select
+                          label="Occupancy"
+                          name="occupancy"
+                          variant="outlined"
+                          value={floor.occupancy}
+                          onChange={(e) => handleFloorChange(floor.id, e)}
+                        >
+                          {FloorOccupancy.map((option) => (
+                            <MenuItem key={option} value={option}>
+                              {option}
+                            </MenuItem>
+                          ))}
+                        </Select>
                       </FormControl>
                     </Col>
                   </Row>
@@ -852,34 +910,56 @@ function App() {
                       </FormControl>
                     </Col>
                     <Col md={6}>
-                      <FormControl fullWidth className="mt-3">
-                        <TextField
-                          label="Establishment"
-                          name="establishment"
-                          variant="outlined"
-                          value={floor.establishment}
-                          onChange={(e) => handleFloorChange(floor.id, e)}
-                        />
-                      </FormControl>
+                      {/* Conditionally render based on selected usage */}
+                      {floor.usage === "Residential" ? null : (
+                        <FormControl fullWidth className="mt-3">
+                          {/* <TextField
+                            label="Establishment"
+                            name="establishment"
+                            variant="outlined"
+                            value={floor.establishment}
+                            onChange={(e) => handleFloorChange(floor.id, e)}
+                          /> */}
+                          <InputLabel>Establishment</InputLabel>
+                          <Select
+                            label="Establishment"
+                            name="establishment"
+                            variant="outlined"
+                            value={floor.establishment}
+                            onChange={(e) => handleFloorChange(floor.id, e)}
+                            onOpen={() => filterOptions(searchInput)}
+                          >
+                            {filteredOptions.map((option) => (
+                              <MenuItem key={option} value={option}>
+                                {option}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      )}
                     </Col>
                   </Row>
                   <Row className="mt-3">
                     <Col md={6}>
-                      <FormControl fullWidth className="mt-3">
-                        <TextField
-                          label="Establishment Name"
-                          name="establishmentName"
-                          variant="outlined"
-                          value={floor.establishmentName}
-                          onChange={(e) => handleFloorChange(floor.id, e)}
-                        />
-                      </FormControl>
+                      {/* Conditionally render based on selected usage */}
+                      {floor.usage === "Residential" ? null : (
+                        <FormControl fullWidth className="mt-3">
+                          <TextField
+                            label="Establishment Name"
+                            name="establishmentName"
+                            variant="outlined"
+                            value={floor.establishmentName}
+                            onChange={(e) => handleFloorChange(floor.id, e)}
+                          />
+                        </FormControl>
+                      )}
                     </Col>
                     <Col md={6}>
                       <IconButton
                         color="secondary"
                         className="mt-3"
                         onClick={() => deleteFloorInformation(floor.id)}
+                        disabled={index === 0} // Disable delete for the first floor
                       >
                         <DeleteIcon />
                       </IconButton>
@@ -1008,7 +1088,7 @@ function App() {
                 </Col>
               </Row>
             </Box>
-            <Box mt={4} textAlign="center">
+            {/* <Box mt={4} textAlign="center">
               <MuiButton
                 onClick={handleSubmit}
                 variant="contained"
@@ -1016,6 +1096,33 @@ function App() {
               >
                 Final Submit
               </MuiButton>
+            </Box> */}
+            <Box mt={4} textAlign="center">
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleSubmit}
+                disabled={loading}
+                startIcon={
+                  loading && <CircularProgress size={20} color="inherit" />
+                }
+              >
+                Final Submit
+              </Button>
+              <Snackbar
+                open={openSnackbar}
+                autoHideDuration={6000} // Adjust as needed
+                onClose={handleCloseSnackbar}
+              >
+                <MuiAlert
+                  elevation={6}
+                  variant="filled"
+                  onClose={handleCloseSnackbar}
+                  severity={successMessage ? "success" : "error"}
+                >
+                  {successMessage || errorMessage}
+                </MuiAlert>
+              </Snackbar>
             </Box>
           </Paper>
         )}
@@ -1060,4 +1167,4 @@ function App() {
   );
 }
 
-export default App;
+export default PropertyDetails;

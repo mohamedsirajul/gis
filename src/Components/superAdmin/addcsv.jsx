@@ -1,14 +1,35 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { Container, Row, Col, Button, Form, Spinner } from "react-bootstrap";
-import "./App.css";
+import Papa from "papaparse";
+import {
+  Container,
+  Row,
+  Col,
+  Button,
+  Form,
+  Spinner,
+  Table,
+} from "react-bootstrap";
 
-function SuperAdmin() {
+function Addcsv() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [csvData, setCsvData] = useState([]);
+  const [csvHeaders, setCsvHeaders] = useState([]);
 
   const handleFileChange = (event) => {
-    setSelectedFile(event.target.files[0]);
+    const file = event.target.files[0];
+    setSelectedFile(file);
+
+    if (file) {
+      Papa.parse(file, {
+        header: true,
+        complete: (results) => {
+          setCsvHeaders(results.meta.fields);
+          setCsvData(results.data);
+        },
+      });
+    }
   };
 
   const handleSubmit = async (event) => {
@@ -75,10 +96,30 @@ function SuperAdmin() {
               )}
             </Button>
           </Form>
+          {csvData.length > 0 && (
+            <Table striped bordered hover className="mt-3">
+              <thead>
+                <tr>
+                  {csvHeaders.map((header, index) => (
+                    <th key={index}>{header}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {csvData.map((row, rowIndex) => (
+                  <tr key={rowIndex}>
+                    {csvHeaders.map((header, colIndex) => (
+                      <td key={colIndex}>{row[header]}</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          )}
         </Col>
       </Row>
     </Container>
   );
 }
 
-export default SuperAdmin;
+export default Addcsv;

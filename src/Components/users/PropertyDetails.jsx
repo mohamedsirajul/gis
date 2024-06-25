@@ -104,6 +104,9 @@ function PropertyDetails() {
   const [TotalFloor, setTotalFloor] = useState("");
   const [selectedAreaofplot, setselectedAreaofplot] = useState("");
   const [selectedMobile, setSelectedMobile] = useState("");
+  const [assmtNo, setassmtNo] = useState("");
+  const [OldassmtNo, setOldassmtNo] = useState("");
+  const [usagename, setusagename] = useState("");
 
   //Address Details
   const [address1, setAdress1] = useState("");
@@ -231,10 +234,14 @@ function PropertyDetails() {
       })
         .then((response) => response.json())
         .then((data) => {
+          console.log(data);
           setSelectedDoorNo(data.NewDoorNo);
           setSelectedOwner(data.Owner_name);
           setselectedAreaofplot(data.PlotArea);
           setSelectedMobile(data.Mobileno);
+          setassmtNo(data.AssesmentNo);
+          setOldassmtNo(data.OldAssesmentNo);
+          setusagename(data.usagename);
         })
         .catch((error) => {
           console.error("Error sending POST request:", error);
@@ -242,8 +249,10 @@ function PropertyDetails() {
     }
   }, [selectedBillNo]);
 
+  const user_id = localStorage.getItem("user_id");
+  // console.log(user_id);
   useEffect(() => {
-    fetch("https://luisnellai.xyz/siraj/admin/get_assigned_task.php/1")
+    fetch(`https://luisnellai.xyz/siraj/admin/get_assigned_task.php/${user_id}`)
       .then((response) => response.json())
       .then((data) => {
         setData(data);
@@ -355,12 +364,19 @@ function PropertyDetails() {
     setLoading(true); // Set loading to true when the form submission starts
 
     const formData = new FormData();
+    let AssessmentNo = assmtNo;
+    let oldAssessmentNo = OldassmtNo;
 
-    let user_id = 2;
+    // console.log(selectedBuildingUsedAs);
+    // console.log(AssessmentNo);
+    // console.log(oldAssessmentNo);
+    let user_id = localStorage.getItem("user_id");
     const jsonData = {
       user_id,
       BuildingName,
       Gisid,
+      AssessmentNo,
+      oldAssessmentNo,
       TotalFloor,
       address1,
       address2,
@@ -375,7 +391,6 @@ function PropertyDetails() {
       pinCode,
       ramp,
       selectedAreaofplot,
-      selectedBillNo,
       selectedBuildingUsedAs,
       selectedDoorNo,
       selectedHoarding,
@@ -421,6 +436,9 @@ function PropertyDetails() {
       if (response.ok) {
         setSuccessMessage("Building data submitted successfully!");
         setErrorMessage(""); // Clear any previous error message
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
       } else {
         setErrorMessage("Failed to submit building data. Please try again.");
         setSuccessMessage(""); // Clear any previous success message
@@ -652,6 +670,16 @@ function PropertyDetails() {
                         </MenuItem>
                       ))}
                     </Select>
+
+                    {/* <TextField
+                      label="Building Used As"
+                      variant="outlined"
+                      value={usagename}
+                      onChange={(e) =>
+                        setSelectedBuildingUsedAs(e.target.value)
+                      }
+                      disabled
+                    /> */}
                   </FormControl>
                 </Col>
               </Row>
@@ -696,7 +724,7 @@ function PropertyDetails() {
                       variant="outlined"
                       value={selectedAreaofplot}
                       onChange={(e) => setselectedAreaofplot(e.target.value)}
-                      disabled
+                      // disabled
                     />
                   </FormControl>
                 </Col>
@@ -709,7 +737,7 @@ function PropertyDetails() {
                       variant="outlined"
                       value={selectedMobile}
                       onChange={(e) => setSelectedMobile(e.target.value)}
-                      disabled
+                      // disabled
                     />
                   </FormControl>
                 </Col>
@@ -839,7 +867,8 @@ function PropertyDetails() {
                           label="Area"
                           name="area"
                           variant="outlined"
-                          value={floor.area}
+                          // value={floor.area}
+                          value={selectedAreaofplot}
                           onChange={(e) => handleFloorChange(floor.id, e)}
                         />
                       </FormControl>
@@ -869,6 +898,14 @@ function PropertyDetails() {
                             </MenuItem>
                           ))}
                         </Select>
+                        {/* <TextField
+                          label="Usage"
+                          name="usage"
+                          variant="outlined"
+                          value={usagename}
+                          onChange={(e) => handleUsageChange(floor.id, e)}
+                          
+                        /> */}
                       </FormControl>
                     </Col>
                     <Col md={6}>

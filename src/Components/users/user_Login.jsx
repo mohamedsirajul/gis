@@ -79,8 +79,12 @@ export default function AdminLogin() {
 
       const data = await response.json();
       if (data.status === "success") {
+        // console.log(data);
         const token = data.token;
+        const user_id = data.user_id;
         localStorage.setItem("user_token", token);
+        localStorage.setItem("user_id", user_id);
+
         // const decodedToken = jwtDecode(token);
         // console.log(decodedToken);
         window.location.href = "/prop_details";
@@ -124,7 +128,7 @@ export default function AdminLogin() {
         >
           <StyledAvatar />
           <Typography component="h3" variant="h5">
-            User Login
+            Surveyor Login
           </Typography>
           <Box
             component="form"

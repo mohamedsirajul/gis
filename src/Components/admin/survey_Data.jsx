@@ -4,13 +4,9 @@ import {
   Container,
   CircularProgress,
   Alert,
-  Card,
-  CardContent,
-  Typography,
   AppBar,
   Toolbar,
   IconButton,
-  CardMedia,
   Table,
   TableBody,
   TableCell,
@@ -18,14 +14,26 @@ import {
   TableHead,
   TableRow,
   Paper,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  CardMedia,
+  Typography,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 
 const ViewSurvey = () => {
   const { user_id } = useParams();
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [dialogContent, setDialogContent] = useState(null);
+  const [dialogTitle, setDialogTitle] = useState("");
 
   useEffect(() => {
     const fetchProperties = async () => {
@@ -52,6 +60,18 @@ const ViewSurvey = () => {
     window.location.href = "/users";
   };
 
+  const handleOpenDialog = (title, content) => {
+    setDialogTitle(title);
+    setDialogContent(content);
+    setOpenDialog(true);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setDialogContent(null);
+    setDialogTitle("");
+  };
+
   if (loading) {
     return <CircularProgress />;
   }
@@ -67,7 +87,7 @@ const ViewSurvey = () => {
           <IconButton edge="start" color="inherit" onClick={handleBack}>
             <ArrowBackIcon />
           </IconButton>
-          <Typography variant="h6">Back</Typography>
+          <Typography variant="h6">Survey Data</Typography>
         </Toolbar>
       </AppBar>
       <Container>
@@ -76,100 +96,170 @@ const ViewSurvey = () => {
             No properties found for user ID {user_id}
           </Alert>
         ) : (
-          properties.map((property, index) => (
-            <Card
-              key={index}
-              variant="outlined"
-              style={{ marginBottom: "20px" }}
-            >
-              <CardMedia
-                component="img"
-                height="200"
-                image={`data:image/jpeg;base64,${property.image}`} // Assuming property.image is a base64 encoded image string
-                alt={property.BuildingName}
-                style={{ width: "300px" }}
-              />
-              <CardContent>
-                <Typography variant="h5" component="h2">
-                  Building Name: {property.BuildingName}
-                </Typography>
-                <Typography>Gisid: {property.Gisid}</Typography>
-                <Typography>Total Floors: {property.TotalFloor}</Typography>
-                <Typography>
-                  Address: {property.address1}, {property.address2}
-                </Typography>
-                <Typography>Area: {property.area}</Typography>
-                <Typography>
-                  City: {property.city}, State: {property.state}
-                </Typography>
-                <Typography>
-                  Pin Code: {property.pinCode}, Ward: {property.Ward}
-                </Typography>
-                <Typography>
-                  Property Ownership: {property.property_ownership}
-                </Typography>
-                <Typography>Building Type: {property.buildingtype}</Typography>
-                <Typography>
-                  Owner: {property.Owner}, Mobile: {property.Mobile}
-                </Typography>
-                <Typography>
-                  Hoarding: {property.Hoarding}, Mobile Tower:{" "}
-                  {property.MobileTower}
-                </Typography>
-                <Typography>
-                  Ramp: {property.ramp}, Area of Plot: {property.areaofplot}
-                </Typography>
-                <Typography>
-                  Head Rooms: {property.headRooms}, Lift Rooms:{" "}
-                  {property.liftRooms}
-                </Typography>
-                <Typography>
-                  Location: {property.location}, OHT: {property.oht}, Parking:{" "}
-                  {property.parking}
-                </Typography>
-                <Typography
-                  variant="h6"
-                  component="h3"
-                  style={{ marginTop: "20px" }}
-                >
-                  Floor Information:
-                </Typography>
-                <TableContainer component={Paper}>
-                  <Table
-                    sx={{ minWidth: 650 }}
-                    aria-label="building-floor-table"
-                  >
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>Area</TableCell>
-                        <TableCell>Establishment</TableCell>
-                        <TableCell>Establishment Name</TableCell>
-                        <TableCell>Flat No</TableCell>
-                        <TableCell>Floor</TableCell>
-                        <TableCell>Occupancy</TableCell>
-                        <TableCell>Usage</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {property.floorInformation.map((floor, floorIndex) => (
-                        <TableRow key={floorIndex}>
-                          <TableCell>{floor.area}</TableCell>
-                          <TableCell>{floor.establishment}</TableCell>
-                          <TableCell>{floor.establishmentName}</TableCell>
-                          <TableCell>{floor.flatNo}</TableCell>
-                          <TableCell>{floor.floor}</TableCell>
-                          <TableCell>{floor.occupancy}</TableCell>
-                          <TableCell>{floor.usage}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </CardContent>
-            </Card>
-          ))
+          <TableContainer component={Paper} style={{ marginTop: "20px" }}>
+            <Table sx={{ minWidth: 650 }} aria-label="building-data-table">
+              <TableHead>
+                <TableRow>
+                  <TableCell>S.No</TableCell>
+                  <TableCell>Ward_Name</TableCell>
+                  <TableCell>Street_Name</TableCell>
+                  <TableCell>Ownership</TableCell>
+                  <TableCell>B_Type</TableCell>
+                  <TableCell>GIS_ID</TableCell>
+                  <TableCell>AssessmentNo</TableCell>
+                  <TableCell>oldAssessmentNo</TableCell>
+                  <TableCell>Plt_Area</TableCell>
+                  <TableCell>Door_Num</TableCell>
+                  <TableCell>Owner Name</TableCell>
+                  <TableCell>Mobile</TableCell>
+                  <TableCell>Address</TableCell>
+                  {/* <TableCell>Usage</TableCell> */}
+                  <TableCell>Total Floors</TableCell>
+                  <TableCell>Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {properties.map((property, index) => (
+                  <TableRow key={index}>
+                    <TableCell>{index + 1}</TableCell>
+                    <TableCell>{property.Ward}</TableCell>
+                    <TableCell>{property.Street}</TableCell>
+                    <TableCell>{property.property_ownership}</TableCell>
+                    <TableCell>{property.buildingtype}</TableCell>
+                    <TableCell>{property.Gisid}</TableCell>
+                    <TableCell>{property.AssessmentNo}</TableCell>
+                    <TableCell>{property.oldAssessmentNo}</TableCell>
+                    <TableCell>{property.areaofplot}</TableCell>
+                    <TableCell>{property.DoorNo}</TableCell>
+                    <TableCell>{property.Owner}</TableCell>
+                    <TableCell>{property.Mobile}</TableCell>
+                    <TableCell>
+                      {property.address1}, {property.address2}
+                    </TableCell>
+                    {/* <TableCell>{property.usage}</TableCell> */}
+                    <TableCell>{property.TotalFloor}</TableCell>
+                    <TableCell>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        startIcon={<VisibilityIcon />}
+                        onClick={() =>
+                          handleOpenDialog(
+                            "Floor Information",
+                            <Table>
+                              <TableHead>
+                                <TableRow>
+                                  <TableCell>Area</TableCell>
+                                  <TableCell>Establishment</TableCell>
+                                  <TableCell>Establishment Name</TableCell>
+                                  <TableCell>Flat No</TableCell>
+                                  <TableCell>Floor</TableCell>
+                                  <TableCell>Occupancy</TableCell>
+                                  <TableCell>Usage</TableCell>
+                                </TableRow>
+                              </TableHead>
+                              <TableBody>
+                                {property.floorInformation.map(
+                                  (floor, floorIndex) => (
+                                    <TableRow key={floorIndex}>
+                                      <TableCell>{floor.area}</TableCell>
+                                      <TableCell>
+                                        {floor.establishment}
+                                      </TableCell>
+                                      <TableCell>
+                                        {floor.establishmentName}
+                                      </TableCell>
+                                      <TableCell>{floor.flatNo}</TableCell>
+                                      <TableCell>{floor.floor}</TableCell>
+                                      <TableCell>{floor.occupancy}</TableCell>
+                                      <TableCell>{floor.usage}</TableCell>
+                                    </TableRow>
+                                  )
+                                )}
+                              </TableBody>
+                            </Table>
+                          )
+                        }
+                      >
+                        Floor
+                      </Button>
+                      <br></br>
+                      <br></br>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        startIcon={<VisibilityIcon />}
+                        onClick={() =>
+                          handleOpenDialog(
+                            "Facility Details",
+                            <DialogContentText>
+                              <strong>Hoarding:</strong> {property.Hoarding}
+                              <br />
+                              <strong>Mobile Tower:</strong>{" "}
+                              {property.MobileTower}
+                              <br />
+                              <strong>Ramp:</strong> {property.ramp}
+                              <br />
+                              <strong>Area of Plot:</strong>{" "}
+                              {property.areaofplot}
+                              <br />
+                              <strong>Head Rooms:</strong> {property.headRooms}
+                              <br />
+                              <strong>Lift Rooms:</strong> {property.liftRooms}
+                              <br />
+                              <strong>Location:</strong> {property.location}
+                              <br />
+                              <strong>OHT:</strong> {property.oht}
+                              <br />
+                              <strong>Parking:</strong> {property.parking}
+                            </DialogContentText>
+                          )
+                        }
+                      >
+                        Facility
+                      </Button>
+                      <br></br>
+                      <br></br>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        startIcon={<VisibilityIcon />}
+                        onClick={() =>
+                          handleOpenDialog(
+                            "View Image",
+                            <CardMedia
+                              component="img"
+                              height="400"
+                              image={`data:image/jpeg;base64,${property.image}`}
+                              alt={property.BuildingName}
+                            />
+                          )
+                        }
+                      >
+                        View_Image
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
         )}
       </Container>
+      <Dialog
+        open={openDialog}
+        onClose={handleCloseDialog}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>{dialogTitle}</DialogTitle>
+        <DialogContent>{dialogContent}</DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog} color="primary">
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 };

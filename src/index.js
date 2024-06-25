@@ -85,7 +85,7 @@ const renderRoutes = () => {
 ReactDOM.render(
   <React.StrictMode>
     <BrowserRouter>{renderRoutes()}</BrowserRouter>
-    <Footer />
+    {/* <Footer /> */}
   </React.StrictMode>,
   document.getElementById("root")
 );

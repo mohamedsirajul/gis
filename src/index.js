@@ -59,6 +59,10 @@ const renderRoutes = () => {
     return (
       <Routes>
         <Route path="/" element={<Navigate replace to="prop_details" />} />
+        <Route
+          path="/user_login"
+          element={<Navigate replace to="/prop_details" />}
+        />
         <Route path="/prop_details" element={<PropertyDetails />} />
         <Route path="*" element={<Navigate to="/prop_details" replace />} />
       </Routes>

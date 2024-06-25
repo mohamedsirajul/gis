@@ -46,11 +46,13 @@ const renderRoutes = () => {
   } else if (isAdminLoggedIn()) {
     return (
       <Routes>
-        {/* <Route path="/" element={<Navigate replace to="dashboard" />} /> */}
+        <Route path="/" element={<Navigate replace to="/users" />} />
+        <Route path="/admin_login" element={<Navigate replace to="/users" />} />
         <Route path="users" element={<Users />} />
         <Route path="/assignTask/:user_id" element={<AssignTask />} />
         <Route path="/viewTask/:user_id" element={<ViewTask />} />
         <Route path="/viewSurvey/:user_id" element={<ViewSurvey />} />
+        <Route path="*" element={<Navigate to="/users" replace />} />
       </Routes>
     );
   } else if (isUserLoggedIn()) {
@@ -72,6 +74,30 @@ const renderRoutes = () => {
     );
   }
 };
+
+// const renderRoutes = () => {
+//   if (isLoggedIn()) {
+//     return (
+//       <Routes>
+//         <Route path="/" element={<Navigate replace to="users" />} />
+//         {/* <Route index element={<Navigate replace to="order" />} /> */}
+//         <Route path="users" element={<Users />} />
+//         <Route path="/assignTask/:user_id" element={<AssignTask />} />
+//         <Route path="/viewTask/:user_id" element={<ViewTask />} />
+//         <Route path="/viewSurvey/:user_id" element={<ViewSurvey />} />
+//       </Routes>
+//     );
+//   } else {
+//     return (
+//       <Routes>
+//         <Route path="/" element={<AdminLogin />} />
+//         {/* <Route path="/user_login" element={<UserLogin />} /> */}
+//         {/* <Route path="/admin_login" element={<AdminLogin />} /> */}
+//         <Route path="*" element={<Navigate to="/" replace />} />
+//       </Routes>
+//     );
+//   }
+// };
 
 ReactDOM.render(
   <React.StrictMode>

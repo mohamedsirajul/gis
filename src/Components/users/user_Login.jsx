@@ -1,133 +1,209 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
-import {
-  Card,
-  Row,
-  Col,
-  Form,
-  Input,
-  Button,
-  Divider,
-  Tag,
-  message,
-} from "antd";
-import jwtDecode from "jwt-decode"; // Correct import statement for jwt-decode
+import React, { useState } from "react";
+import Avatar from "@mui/material/Avatar";
+import Button from "@mui/material/Button";
+import CircularProgress from "@mui/material/CircularProgress";
+import CssBaseline from "@mui/material/CssBaseline";
+import TextField from "@mui/material/TextField";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import Container from "@mui/material/Container";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { styled } from "@mui/material/styles";
+// import { jwtDecode } from "jwt-decode"; // Ensure correct import
 
-const { Meta } = Card;
+const defaultTheme = createTheme();
 
-const UserLogin = () => {
-  const [form] = Form.useForm(); // Correct usage of useForm outside the component
+const StyledAvatar = styled(Avatar)(({ theme }) => ({
+  width: theme.spacing(10),
+  height: theme.spacing(10),
+  backgroundColor: theme.palette.secondary.main,
+  "& img": {
+    width: "100%",
+    height: "auto",
+    borderRadius: "50%",
+  },
+}));
 
-  const navigate = useNavigate();
+export default function AdminLogin() {
+  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [errors, setErrors] = useState({ email: "", password: "" });
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const onFinish = async (values) => {
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setFormData({ ...formData, [name]: value });
+    if (name === "email") {
+      const emailError = validateEmail(value);
+      setError(null);
+      setErrors({ ...errors, email: emailError });
+    }
+
+    if (name === "password") {
+      const passwordError = validatePassword(value);
+      setErrors({ ...errors, password: passwordError });
+    }
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    const { email, password } = formData;
+
+    const emailError = validateEmail(email);
+    const passwordError = validatePassword(password);
+
+    if (emailError || passwordError) {
+      setErrors({ email: emailError, password: passwordError });
+      return;
+    }
+
+    setErrors({ email: "", password: "" });
+    setLoading(true);
+
     try {
       const response = await fetch(
-        "https://luisnellai.xyz/siraj/admin/user_login.php",
+        `https://luisnellai.xyz/siraj/admin/user_login.php`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            email: values.email,
-            password: values.password,
-          }),
+          body: JSON.stringify({ email, password }),
         }
       );
 
       if (!response.ok) {
-        throw new Error("Login failed");
+        throw new Error("Failed to login");
       }
 
       const data = await response.json();
-
-      console.log(data);
-      const user_token = data.token; // Assuming the API returns a token upon successful login
-      localStorage.setItem("user_token", user_token);
-
-      //   Decoding JWT token to get employee data
-      //   const userData = jwtDecode(token);
-      // localStorage.setItem("Empid", empData.empId);
-
-      // Display success message and navigate to '/assigntask'
-      message.success("Logged in successfully", 5);
-      window.location.href = "/prop_details";
+      if (data.status === "success") {
+        const token = data.token;
+        localStorage.setItem("user_token", token);
+        // const decodedToken = jwtDecode(token);
+        // console.log(decodedToken);
+        window.location.href = "/prop_details";
+      } else {
+        throw new Error(data.message || "Login failed");
+      }
     } catch (error) {
-      console.error("Login error:", error);
-      // Display error message if login fails
-      message.error(`Unable to login: ${error.message || "Unknown error"}`, 5);
+      setError("Invalid email or password");
+    } finally {
+      setLoading(false);
     }
   };
 
-  return (
-    <div className="login" style={{ marginTop: "8%" }}>
-      <Form
-        form={form}
-        layout="vertical"
-        name="login"
-        style={{ width: "100%", display: "block" }}
-        size="large"
-        scrollToFirstError={{
-          behavior: "smooth",
-        }}
-        onFinish={onFinish}
-      >
-        <Row gutter={[16, 16]}>
-          <Col sm={24} md={8} xxl={9} />
-          <Col sm={24} md={8} xxl={6}>
-            <Card className="login__card">
-              <Meta
-                description={
-                  <div className="login__detail">
-                    <Divider>
-                      <Tag color="orange" style={{ fontSize: 14 }}>
-                        User Login
-                      </Tag>
-                    </Divider>
-                    <Form.Item
-                      name="email"
-                      label="Email id"
-                      rules={[
-                        {
-                          required: true,
-                          message: "Email id is missing",
-                        },
-                      ]}
-                    >
-                      <Input placeholder="Enter email id" />
-                    </Form.Item>
-                    <Form.Item
-                      name="password"
-                      label="Password"
-                      rules={[
-                        {
-                          required: true,
-                          message: "Password is missing",
-                        },
-                      ]}
-                    >
-                      <Input.Password placeholder="Enter password" />
-                    </Form.Item>
-                    <Form.Item>
-                      <Button
-                        htmlType="submit"
-                        size="large"
-                        className="login__submit"
-                        block
-                      >
-                        Login
-                      </Button>
-                    </Form.Item>
-                  </div>
-                }
-              />
-            </Card>
-          </Col>
-        </Row>
-      </Form>
-    </div>
-  );
-};
+  const validateEmail = (email) => {
+    if (!email) return "Email is required.";
+    if (!isValidEmail(email)) return "Invalid email format.";
+    return "";
+  };
 
-export default UserLogin;
+  const validatePassword = (password) => {
+    if (!password) return "Password is required.";
+    if (password.length < 2) return "Password must be at least 2 characters.";
+    return "";
+  };
+
+  const isValidEmail = (email) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
+
+  return (
+    <ThemeProvider theme={defaultTheme}>
+      <Container component="main" maxWidth="xs">
+        <CssBaseline />
+        <Box
+          sx={{
+            marginTop: 8,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <StyledAvatar />
+          <Typography component="h3" variant="h5">
+            User Login
+          </Typography>
+          <Box
+            component="form"
+            onSubmit={handleSubmit}
+            noValidate
+            sx={{ mt: 1 }}
+          >
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              id="email"
+              label="Email Address"
+              name="email"
+              autoComplete="email"
+              value={formData.email}
+              onChange={handleChange}
+              error={!!errors.email}
+              helperText={errors.email}
+              disabled={loading}
+              sx={{
+                "& .MuiInputLabel-root": {
+                  color: "#A2A08B",
+                },
+                "& .MuiOutlinedInput-root": {
+                  "&:hover fieldset": {
+                    borderColor: "black",
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#A2A08B",
+                  },
+                },
+              }}
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              name="password"
+              label="Password"
+              type="password"
+              id="password"
+              autoComplete="current-password"
+              value={formData.password}
+              onChange={handleChange}
+              error={!!errors.password}
+              helperText={errors.password}
+              disabled={loading}
+              sx={{
+                "& .MuiInputLabel-root": {
+                  color: "#A2A08B",
+                },
+                "& .MuiOutlinedInput-root": {
+                  "&:hover fieldset": {
+                    borderColor: "black",
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#A2A08B",
+                  },
+                },
+              }}
+            />
+            <Button
+              type="submit"
+              fullWidth
+              disabled={loading}
+              sx={{
+                mt: 2,
+                mb: 2,
+                backgroundColor: "violet",
+                color: "white",
+              }}
+            >
+              {loading ? <CircularProgress size={24} /> : "Login"}
+            </Button>
+            {error && <Typography color="error">{error}</Typography>}
+          </Box>
+        </Box>
+      </Container>
+    </ThemeProvider>
+  );
+}

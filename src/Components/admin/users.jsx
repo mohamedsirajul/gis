@@ -130,16 +130,7 @@ const Users = () => {
             >
               Hello, GIS!
             </BolderTypography>
-            <div className="datime">
-              <p className="insidedateime">
-                {currentTime.toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "2-digit",
-                  year: "numeric",
-                })}
-                | {currentTime.toLocaleTimeString("en-US")}
-              </p>
-            </div>
+
             <IconButton
               aria-label="account of current user"
               aria-controls="menu-appbar"

@@ -243,7 +243,7 @@ const AssignTask = () => {
       const result = await response.json();
       alert("Task assigned successfully");
       setLoading(false);
-      window.location.href = "dashboard/users";
+      window.location.href = "/users";
     } catch (error) {
       setError(error);
       setLoading(false);

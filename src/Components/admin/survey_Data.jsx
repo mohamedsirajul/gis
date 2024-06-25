@@ -49,7 +49,7 @@ const ViewSurvey = () => {
   }, [user_id]);
 
   const handleBack = () => {
-    window.location.href = "/dashboard/users";
+    window.location.href = "/users";
   };
 
   if (loading) {

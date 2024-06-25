@@ -11,12 +11,13 @@ import {
   Tag,
   message,
 } from "antd";
-import jwtDecode from "jwt-decode";
+import jwtDecode from "jwt-decode"; // Correct import statement for jwt-decode
 
 const { Meta } = Card;
 
 const UserLogin = () => {
-  const [form] = Form.useForm();
+  const [form] = Form.useForm(); // Correct usage of useForm outside the component
+
   const navigate = useNavigate();
 
   const onFinish = async (values) => {
@@ -35,23 +36,23 @@ const UserLogin = () => {
         }
       );
 
+      if (!response.ok) {
+        throw new Error("Login failed");
+      }
+
       const data = await response.json();
 
-      if (response.ok) {
-        const user_token = data.token; // Assuming the API returns a token upon successful login
-        localStorage.setItem("user_token", user_token);
+      console.log(data);
+      const user_token = data.token; // Assuming the API returns a token upon successful login
+      localStorage.setItem("user_token", user_token);
 
-        // Decode JWT token if needed
-        // const userData = jwtDecode(user_token);
-        // localStorage.setItem("Empid", userData.empId);
+      //   Decoding JWT token to get employee data
+      //   const userData = jwtDecode(token);
+      // localStorage.setItem("Empid", empData.empId);
 
-        // Display success message and navigate to '/prop_details'
-        message.success("Logged in successfully", 5);
-        navigate("/prop_details"); // Use navigate hook to redirect programmatically
-      } else {
-        // Server responded with an error status
-        throw new Error(data.message || "Login failed");
-      }
+      // Display success message and navigate to '/assigntask'
+      message.success("Logged in successfully", 5);
+      window.location.href = "/prop_details";
     } catch (error) {
       console.error("Login error:", error);
       // Display error message if login fails

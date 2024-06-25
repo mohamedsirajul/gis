@@ -52,7 +52,7 @@ const AdminLogin = () => {
 
       // Display success message and navigate to '/assigntask'
       message.success("Logged in successfully", 5);
-      window.location.href = "/dashboard";
+      window.location.href = "/users";
     } catch (error) {
       console.error("Login error:", error);
       // Display error message if login fails

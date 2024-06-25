@@ -9,7 +9,6 @@ import UserLogin from "./Components/users/user_Login";
 import ViewPropertyDetails from "./Components/superAdmin/ViewPropertyDetails";
 import AdminLogin from "./Components/admin/admin_Login";
 import Users from "./Components/admin/users";
-import Dashboard from "./Components/admin/dashboard";
 import AssignTask from "./Components/admin/AssignTask";
 import ViewTask from "./Components/admin/viewTask";
 import ViewSurvey from "./Components/admin/survey_Data";
@@ -47,11 +46,8 @@ const renderRoutes = () => {
   } else if (isAdminLoggedIn()) {
     return (
       <Routes>
-        <Route path="/" element={<Navigate replace to="dashboard" />} />
-        <Route path="/dashboard" element={<Dashboard />}>
-          <Route index element={<Navigate replace to="users" />} />
-          <Route path="users" element={<Users />} />
-        </Route>
+        {/* <Route path="/" element={<Navigate replace to="dashboard" />} /> */}
+        <Route path="users" element={<Users />} />
         <Route path="/assignTask/:user_id" element={<AssignTask />} />
         <Route path="/viewTask/:user_id" element={<ViewTask />} />
         <Route path="/viewSurvey/:user_id" element={<ViewSurvey />} />

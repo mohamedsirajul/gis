@@ -10,6 +10,13 @@ import {
   Spinner,
   Table,
 } from "react-bootstrap";
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Button as MUIButton,
+} from "@mui/material";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 function Addcsv() {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -65,60 +72,77 @@ function Addcsv() {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("super_admin_token");
+    window.location.href = "/sadmin_login";
+  };
+
   return (
-    <Container>
-      <Row>
-        <Col>
-          <h1>Upload CSV</h1>
-          <Form onSubmit={handleSubmit}>
-            <Form.Group controlId="formFile" className="mb-3">
-              <Form.Label>Upload CSV File</Form.Label>
-              <Form.Control
-                type="file"
-                accept=".csv"
-                onChange={handleFileChange}
-              />
-            </Form.Group>
-            <Button variant="primary" type="submit" disabled={loading}>
-              {loading ? (
-                <>
-                  <Spinner
-                    as="span"
-                    animation="border"
-                    size="sm"
-                    role="status"
-                    aria-hidden="true"
-                  />{" "}
-                  Uploading...
-                </>
-              ) : (
-                "Submit"
-              )}
-            </Button>
-          </Form>
-          {csvData.length > 0 && (
-            <Table striped bordered hover className="mt-3">
-              <thead>
-                <tr>
-                  {csvHeaders.map((header, index) => (
-                    <th key={index}>{header}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {csvData.map((row, rowIndex) => (
-                  <tr key={rowIndex}>
-                    {csvHeaders.map((header, colIndex) => (
-                      <td key={colIndex}>{row[header]}</td>
+    <>
+      <AppBar position="static">
+        <Toolbar>
+          <Typography variant="h6" style={{ flexGrow: 1 }}>
+            CSV Uploader
+          </Typography>
+          <MUIButton color="inherit" onClick={handleLogout}>
+            Logout
+          </MUIButton>
+        </Toolbar>
+      </AppBar>
+      <Container>
+        <Row>
+          <Col>
+            <h1>Upload CSV</h1>
+            <Form onSubmit={handleSubmit}>
+              <Form.Group controlId="formFile" className="mb-3">
+                <Form.Label>Upload CSV File</Form.Label>
+                <Form.Control
+                  type="file"
+                  accept=".csv"
+                  onChange={handleFileChange}
+                />
+              </Form.Group>
+              <Button variant="primary" type="submit" disabled={loading}>
+                {loading ? (
+                  <>
+                    <Spinner
+                      as="span"
+                      animation="border"
+                      size="sm"
+                      role="status"
+                      aria-hidden="true"
+                    />{" "}
+                    Uploading...
+                  </>
+                ) : (
+                  "Submit"
+                )}
+              </Button>
+            </Form>
+            {csvData.length > 0 && (
+              <Table striped bordered hover className="mt-3">
+                <thead>
+                  <tr>
+                    {csvHeaders.map((header, index) => (
+                      <th key={index}>{header}</th>
                     ))}
                   </tr>
-                ))}
-              </tbody>
-            </Table>
-          )}
-        </Col>
-      </Row>
-    </Container>
+                </thead>
+                <tbody>
+                  {csvData.map((row, rowIndex) => (
+                    <tr key={rowIndex}>
+                      {csvHeaders.map((header, colIndex) => (
+                        <td key={colIndex}>{row[header]}</td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            )}
+          </Col>
+        </Row>
+      </Container>
+    </>
   );
 }
 

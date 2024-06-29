@@ -13,6 +13,7 @@ import AssignTask from "./Components/admin/AssignTask";
 import ViewTask from "./Components/admin/viewTask";
 import ViewSurvey from "./Components/admin/survey_Data";
 import Footer from "./Components/footer";
+import SuperAdminLogin from "./Components/superAdmin/superadmin_Login";
 
 // Function to check if the user is logged in
 const isUserLoggedIn = () => {
@@ -32,16 +33,10 @@ const renderRoutes = () => {
   if (isSuperAdminLoggedIn()) {
     return (
       <Routes>
-        <Route
-          path="/"
-          element={<Navigate replace to="/viewbuildingdetails" />}
-        />
+        <Route path="/" element={<Navigate replace to="/addcsv" />} />
         <Route path="/addcsv" element={<AddCsv />} />
         <Route path="/viewbuildingdetails" element={<ViewPropertyDetails />} />
-        <Route
-          path="*"
-          element={<Navigate to="/viewbuildingdetails" replace />}
-        />
+        <Route path="*" element={<Navigate to="/addcsv" replace />} />
       </Routes>
     );
   } else if (isAdminLoggedIn()) {
@@ -74,6 +69,7 @@ const renderRoutes = () => {
         <Route path="/" element={<UserLogin />} />
         <Route path="/user_login" element={<UserLogin />} />
         <Route path="/admin_login" element={<AdminLogin />} />
+        <Route path="/sadmin_login" element={<SuperAdminLogin />} />
         <Route path="/prop_details" element={<Navigate to="/" replace />} />
         <Route path="/users" element={<Navigate to="/admin_login" replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />

@@ -122,9 +122,8 @@ export default function VfaAdminLogin() {
           }}
         >
           <StyledAvatar />
-          <Typography component="h3" variant="h5">
-            ViewFloorAnalysis Login
-          </Typography>
+          <br />
+          <Typography variant="h5">ACTR Login</Typography>
           <Box
             component="form"
             onSubmit={handleSubmit}

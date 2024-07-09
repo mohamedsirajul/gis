@@ -166,13 +166,13 @@ const VfaData = () => {
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
-      setSuccessMessage("VfaAdmin added successfully!");
+      setSuccessMessage("ATCRAdmin added successfully!");
       setShowAddDialog(false);
       // Refetch users to update the list
       fetchUsers();
     } catch (error) {
-      setErrorMessage("Failed to add VfaAdmin");
-      console.error("Error adding VfaAdmin:", error);
+      setErrorMessage("Failed to add ATCRAdmin");
+      console.error("Error adding ATCRAdmin:", error);
     }
   };
 
@@ -230,7 +230,7 @@ const VfaData = () => {
           onClick={handleOpenDialog}
           endIcon={<AddIcon />} // Replace AddIcon with your desired icon component
         >
-          Add Vfa
+          Add ATCR Admin
         </Button>
         <Button
           variant="contained"
@@ -238,7 +238,7 @@ const VfaData = () => {
           style={{ textAlign: "right", marginLeft: "5%", color: "white" }}
           onClick={handleviewclick}
         >
-          View Vfa
+          View ATCR
         </Button>
         <br />
         <br />
@@ -274,7 +274,7 @@ const VfaData = () => {
 
       <Modal show={showAddDialog} onHide={handleCloseDialog}>
         <Modal.Header closeButton>
-          <Modal.Title>Add New VfaAdmin</Modal.Title>
+          <Modal.Title>Add New ATCRAdmin</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
@@ -359,7 +359,7 @@ const VfaData = () => {
             Close
           </BootstrapButton>
           <BootstrapButton variant="primary" onClick={handleAddVfaAdmin}>
-            Add VfaAdmin
+            Add ATCR Admin
           </BootstrapButton>
         </Modal.Footer>
       </Modal>

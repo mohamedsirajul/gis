@@ -103,6 +103,7 @@ const AssignTask = () => {
       const filteredProps = properties.filter(
         (property) => property.WardName === value
       );
+      console.log(filteredProps);
       setFilteredProperties(filteredProps);
       setSelectedStreets([]);
     } else {

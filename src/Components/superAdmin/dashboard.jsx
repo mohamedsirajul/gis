@@ -290,7 +290,7 @@ export default function SuperAdminDashboard() {
             <ListItemIcon>
               <AdminPanelSettingsIcon />
             </ListItemIcon>
-            <ListItemText primary="Fad" />
+            <ListItemText primary="ATE" />
           </ListItem>
           <ListItem
             button
@@ -307,7 +307,7 @@ export default function SuperAdminDashboard() {
             <ListItemIcon>
               <AdminPanelSettingsIcon />
             </ListItemIcon>
-            <ListItemText primary="VFA" />
+            <ListItemText primary="ATCR" />
           </ListItem>
           <ListItem
             button

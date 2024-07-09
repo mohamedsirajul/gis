@@ -104,6 +104,8 @@ function PropertyDetails() {
   const [TotalFloor, setTotalFloor] = useState("");
   const [selectedAreaofplot, setselectedAreaofplot] = useState("");
   const [selectedMobile, setSelectedMobile] = useState("");
+  const [selectedZone, setSelectedZone] = useState("");
+
   const [assmtNo, setassmtNo] = useState("");
   const [OldassmtNo, setOldassmtNo] = useState("");
   const [usagename, setusagename] = useState("");
@@ -239,6 +241,7 @@ function PropertyDetails() {
           setSelectedOwner(data.Owner_name);
           setselectedAreaofplot(data.PlotArea);
           setSelectedMobile(data.Mobileno);
+          setSelectedZone(data.zone);
           setassmtNo(data.AssesmentNo);
           setOldassmtNo(data.OldAssesmentNo);
           setusagename(data.usagename);
@@ -256,6 +259,7 @@ function PropertyDetails() {
       .then((response) => response.json())
       .then((data) => {
         setData(data);
+        console.log(data);
         const uniqueWards = [...new Set(data.map((item) => item.WardName))];
         setWardOptions(uniqueWards);
       })
@@ -367,6 +371,7 @@ function PropertyDetails() {
     let AssessmentNo = assmtNo;
     let oldAssessmentNo = OldassmtNo;
 
+    let zone = selectedZone;
     // console.log(selectedBuildingUsedAs);
     // console.log(AssessmentNo);
     // console.log(oldAssessmentNo);
@@ -402,6 +407,7 @@ function PropertyDetails() {
       selectedWard,
       selectedbuildingTypeOptions,
       state,
+      zone,
     };
 
     formData.append("jsonData", JSON.stringify(jsonData));
@@ -436,9 +442,9 @@ function PropertyDetails() {
       if (response.ok) {
         setSuccessMessage("Building data submitted successfully!");
         setErrorMessage(""); // Clear any previous error message
-        setTimeout(() => {
-          window.location.reload();
-        }, 2000);
+        // setTimeout(() => {
+        //   window.location.reload();
+        // }, 2000);
       } else {
         setErrorMessage("Failed to submit building data. Please try again.");
         setSuccessMessage(""); // Clear any previous success message
@@ -1069,7 +1075,7 @@ function PropertyDetails() {
                 <Col md={6} className="mt-3">
                   <FormControl fullWidth>
                     <TextField
-                      label="No. of Head Rooms"
+                      label="Head Rooms (no of Head Rooms / area of Head Rooms)"
                       variant="outlined"
                       value={headRooms}
                       onChange={(e) => setHeadRooms(e.target.value)}
@@ -1079,7 +1085,7 @@ function PropertyDetails() {
                 <Col md={6} className="mt-3">
                   <FormControl fullWidth>
                     <TextField
-                      label="No. of Lift Rooms"
+                      label="Lift Rooms (no of Lift Rooms / area of Lift Rooms)"
                       variant="outlined"
                       value={liftRooms}
                       onChange={(e) => setLiftRooms(e.target.value)}
@@ -1089,7 +1095,7 @@ function PropertyDetails() {
                 <Col md={6} className="mt-3">
                   <FormControl fullWidth>
                     <TextField
-                      label="Parking"
+                      label="Parking (no of Parking / area of Parking)"
                       variant="outlined"
                       value={parking}
                       onChange={(e) => setParking(e.target.value)}
@@ -1099,7 +1105,7 @@ function PropertyDetails() {
                 <Col md={6} className="mt-3">
                   <FormControl fullWidth>
                     <TextField
-                      label="Ramp"
+                      label="Ramp (no of Ramp / area of Ramp)"
                       variant="outlined"
                       value={ramp}
                       onChange={(e) => setRamp(e.target.value)}
@@ -1109,7 +1115,7 @@ function PropertyDetails() {
                 <Col md={6} className="mt-3">
                   <FormControl fullWidth>
                     <TextField
-                      label="OHT"
+                      label="OHT (no of OHT / area of OHT)"
                       variant="outlined"
                       value={oht}
                       onChange={(e) => setOht(e.target.value)}

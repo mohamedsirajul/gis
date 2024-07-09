@@ -48,8 +48,8 @@ const Home = () => {
         backgroundPosition: "center",
       }}
     >
-      <Typography variant="h3" sx={{ mb: 2 }}>
-        Terralens Tax Navigator
+      <Typography variant="h5">
+        <b>Terralens Tax Navigator</b>
       </Typography>
       <StyledAvatar />
 
@@ -85,11 +85,11 @@ const Home = () => {
             },
           }}
         >
-          <MenuItem value="/user_login">User Login</MenuItem>
+          <MenuItem value="/user_login">Surveyor Login</MenuItem>
           <MenuItem value="/admin_login">Admin Login</MenuItem>
           <MenuItem value="/sadmin_login">Super Admin Login</MenuItem>
-          <MenuItem value="/fadadmin_login">Fad Admin Login</MenuItem>
-          <MenuItem value="/vfa_admin_login">Vfa Admin Login</MenuItem>
+          <MenuItem value="/fadadmin_login">ATE Admin Login</MenuItem>
+          <MenuItem value="/vfa_admin_login">ATCR Admin Login</MenuItem>
         </Select>
       </FormControl>
       <Box

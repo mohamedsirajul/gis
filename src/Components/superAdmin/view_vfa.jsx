@@ -156,6 +156,10 @@ const ViewVfa = () => {
       <Container>
         <Card>
           <CardContent>
+            <Typography variant="h6" style={{ textAlign: "center" }}>
+              <b>Assessment Tax Comparison Report</b>
+            </Typography>
+
             <Typography variant="h6">Filter Data</Typography>
             <br />
             <TextField
@@ -227,7 +231,7 @@ const ViewVfa = () => {
                       textAlign: "center",
                     }}
                   >
-                    SNO
+                    S.No
                   </TableCell>
                   <TableCell
                     style={{

@@ -226,7 +226,7 @@ const FadData = () => {
           onClick={handleOpenDialog}
           endIcon={<AddIcon />} // Replace AddIcon with your desired icon component
         >
-          Add Fad
+          Add ATE Admin
         </Button>
         <br />
         <br />
@@ -262,7 +262,7 @@ const FadData = () => {
 
       <Modal show={showAddDialog} onHide={handleCloseDialog}>
         <Modal.Header closeButton>
-          <Modal.Title>Add New FadAdmin</Modal.Title>
+          <Modal.Title>Add New ATE Admin</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
@@ -347,7 +347,7 @@ const FadData = () => {
             Close
           </BootstrapButton>
           <BootstrapButton variant="primary" onClick={handleAddfadAdmin}>
-            Add fadAdmin
+            Add ATEAdmin
           </BootstrapButton>
         </Modal.Footer>
       </Modal>

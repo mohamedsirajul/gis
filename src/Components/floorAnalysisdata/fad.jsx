@@ -264,7 +264,7 @@ const Fad = () => {
       <AppBar position="static" style={{ backgroundColor: "#eb3f2f" }}>
         <Toolbar>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            FAD Management
+            ATE Management
           </Typography>
           <IconButton
             size="large"
@@ -307,9 +307,9 @@ const Fad = () => {
             <Typography
               variant="h6"
               component="h3"
-              style={{ marginTop: "20px" }}
+              style={{ marginTop: "20px", textAlign: "center" }}
             >
-              Floor Analysis Data
+              <b>Assessment Tax Estimation</b>
             </Typography>
             <TableContainer component={Paper} style={{ marginTop: "20px" }}>
               <Table>
@@ -349,7 +349,7 @@ const Fad = () => {
                         color: "white",
                       }}
                     >
-                      Floor
+                      Floor (in Sq.ft)
                     </TableCell>
                     <TableCell
                       style={{
@@ -359,7 +359,7 @@ const Fad = () => {
                         color: "white",
                       }}
                     >
-                      Floor Area
+                      Floor Area (in Sq.ft)
                     </TableCell>
                     <TableCell
                       style={{
@@ -369,7 +369,7 @@ const Fad = () => {
                         color: "white",
                       }}
                     >
-                      Total Area
+                      Total Area (in Sq.ft)
                     </TableCell>
                     <TableCell
                       style={{
@@ -379,7 +379,7 @@ const Fad = () => {
                         border: "2px solid black",
                       }}
                     >
-                      Roof Area (Drone Survey)
+                      Roof Area (Drone Survey in Sq.ft)
                     </TableCell>
 
                     <TableCell
@@ -576,7 +576,9 @@ const Fad = () => {
                   <b> Proposed Tax: </b>
                   {property.TotalFloorTax}
                 </Typography> */}
-                  <Typography variant="h6">Assessment Information</Typography>
+                  <Typography variant="h6">
+                    Assessment Information - {property.zone}
+                  </Typography>
                   <Table>
                     <TableHead>
                       <TableRow
@@ -605,7 +607,7 @@ const Fad = () => {
                             color: "white",
                           }}
                         >
-                          Existing Tax
+                          Existing Tax (in Rs)
                         </TableCell>
                         <TableCell
                           style={{
@@ -615,7 +617,7 @@ const Fad = () => {
                             color: "white",
                           }}
                         >
-                          Proposes Tax
+                          Proposes Tax (in Rs)
                         </TableCell>
                       </TableRow>
                     </TableHead>
@@ -656,7 +658,7 @@ const Fad = () => {
                     </TableBody>
                   </Table>
                   <br />
-                  <Typography variant="h6">Property Details</Typography>
+                  <Typography variant="h6">Assessment Details</Typography>
                   <Table>
                     <TableHead>
                       <TableRow
@@ -675,7 +677,17 @@ const Fad = () => {
                             fontWeight: "bold",
                           }}
                         >
-                          Gis Id
+                          GIS Id
+                        </TableCell>
+                        <TableCell
+                          style={{
+                            border: "2px solid black",
+                            textAlign: "center",
+                            color: "white",
+                            fontWeight: "bold",
+                          }}
+                        >
+                          Zone
                         </TableCell>
                         <TableCell
                           style={{
@@ -766,6 +778,14 @@ const Fad = () => {
                           }}
                         >
                           {property.Gisid}
+                        </TableCell>
+                        <TableCell
+                          style={{
+                            border: "2px solid black",
+                            textAlign: "center",
+                          }}
+                        >
+                          {property.zone}
                         </TableCell>
                         <TableCell
                           style={{
@@ -870,7 +890,7 @@ const Fad = () => {
                               fontWeight: "bold",
                             }}
                           >
-                            Floor Area
+                            Floor Area (in Sq.ft)
                           </TableCell>
                           <TableCell
                             style={{
@@ -930,7 +950,7 @@ const Fad = () => {
                               fontWeight: "bold",
                             }}
                           >
-                            Floor Tax
+                            Floor Tax (in Rs)
                           </TableCell>
                         </TableRow>
                       </TableHead>
@@ -1308,7 +1328,9 @@ const Fad = () => {
                   <div key={index}>
                     <br></br>
 
-                    <Typography variant="h6">Assessment Information</Typography>
+                    <Typography variant="h6">
+                      Assessment Information - {property.zone}
+                    </Typography>
                     <Table>
                       <TableHead>
                         <TableRow
@@ -1337,7 +1359,7 @@ const Fad = () => {
                               color: "white",
                             }}
                           >
-                            Existing Tax
+                            Existing Tax (in Rs)
                           </TableCell>
                           <TableCell
                             style={{
@@ -1347,7 +1369,7 @@ const Fad = () => {
                               color: "white",
                             }}
                           >
-                            Proposes Tax
+                            Proposes Tax (in Rs)
                           </TableCell>
                         </TableRow>
                       </TableHead>
@@ -1391,7 +1413,7 @@ const Fad = () => {
                       </TableBody>
                     </Table>
                     <br />
-                    <Typography variant="h6">Property Details</Typography>
+                    <Typography variant="h6">Assessment Details</Typography>
                     <Table>
                       <TableHead>
                         <TableRow
@@ -1411,7 +1433,17 @@ const Fad = () => {
                               fontWeight: "bold",
                             }}
                           >
-                            Gis Id
+                            GIS Id
+                          </TableCell>
+                          <TableCell
+                            style={{
+                              border: "2px solid black",
+                              textAlign: "center",
+                              color: "white",
+                              fontWeight: "bold",
+                            }}
+                          >
+                            Zone
                           </TableCell>
                           <TableCell
                             style={{
@@ -1505,6 +1537,14 @@ const Fad = () => {
                             }}
                           >
                             {property.Gisid}
+                          </TableCell>
+                          <TableCell
+                            style={{
+                              border: "2px solid black",
+                              textAlign: "center",
+                            }}
+                          >
+                            {property.zone}
                           </TableCell>
                           <TableCell
                             style={{
@@ -1609,7 +1649,7 @@ const Fad = () => {
                                   fontWeight: "bold",
                                 }}
                               >
-                                Floor Area
+                                Floor Area (in Sq.ft)
                               </TableCell>
                               <TableCell
                                 style={{
@@ -1669,7 +1709,7 @@ const Fad = () => {
                                   fontWeight: "bold",
                                 }}
                               >
-                                Floor Tax
+                                Floor Tax (in Rs)
                               </TableCell>
                               <TableCell
                                 style={{
@@ -1679,7 +1719,7 @@ const Fad = () => {
                                   fontWeight: "bold",
                                 }}
                               >
-                                Update Tax
+                                Update Tax (in Rs)
                               </TableCell>
                             </TableRow>
                           </TableHead>
@@ -1960,7 +2000,7 @@ const Fad = () => {
                               textAlign: "center",
                             }}
                           >
-                            Facility Tax
+                            Facility Tax (in Rs)
                           </TableCell>
                           <TableCell
                             style={{
@@ -2024,7 +2064,7 @@ const Fad = () => {
                               textAlign: "center",
                             }}
                           >
-                            Update Tax
+                            Update Tax (in Rs)
                           </TableCell>
                           <TableCell
                             style={{

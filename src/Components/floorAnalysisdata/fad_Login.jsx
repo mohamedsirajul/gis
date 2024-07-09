@@ -123,7 +123,7 @@ export default function FadAdminLogin() {
         >
           <StyledAvatar />
           <Typography component="h3" variant="h5">
-            FloorAnalysisData Login
+            ATE Login
           </Typography>
           <Box
             component="form"

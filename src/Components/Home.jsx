@@ -48,16 +48,16 @@ const Home = () => {
         backgroundPosition: "center",
       }}
     >
-      {/* <Typography variant="h6" sx={{ mb: 2 }}>
-        Choose Login Type
-      </Typography> */}
+      <Typography variant="h3" sx={{ mb: 2 }}>
+        Terralens Tax Navigator
+      </Typography>
       <StyledAvatar />
 
       <br />
       <FormControl
         variant="outlined"
         sx={{
-          width: "25%",
+          width: "300px",
           borderRadius: 1,
           mb: 4,
           //   boxShadow: 3,

@@ -10,15 +10,9 @@ import {
   Spinner,
   Table,
 } from "react-bootstrap";
-import {
-  AppBar,
-  Toolbar,
-  Typography,
-  Button as MUIButton,
-} from "@mui/material";
 import "bootstrap/dist/css/bootstrap.min.css";
 
-function Addcsv() {
+function AddExistingTax() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [csvData, setCsvData] = useState([]);
@@ -54,7 +48,7 @@ function Addcsv() {
 
     try {
       const response = await axios.post(
-        "https://luisnellai.xyz/siraj/addcsv.php",
+        "https://luisnellai.xyz/siraj/addexistingtax.php", // Replace with your actual backend endpoint
         formData,
         {
           headers: {
@@ -72,20 +66,15 @@ function Addcsv() {
     }
   };
 
-  // const handleLogout = () => {
-  //   localStorage.removeItem("super_admin_token");
-  //   window.location.href = "/sadmin_login";
-  // };
-
   return (
     <>
       <Container>
         <Row>
           <Col>
-            <h3>Upload Property CSV</h3>
+            <h3>Upload Existing Tax CSV</h3>
             <Form onSubmit={handleSubmit}>
               <Form.Group controlId="formFile" className="mb-3">
-                <Form.Label>Upload CSV File</Form.Label>
+                <Form.Label>Upload Existing Tax CSV File</Form.Label>
                 <Form.Control
                   type="file"
                   accept=".csv"
@@ -136,4 +125,4 @@ function Addcsv() {
   );
 }
 
-export default Addcsv;
+export default AddExistingTax;

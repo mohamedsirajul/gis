@@ -1,98 +1,191 @@
 import React, { useEffect, useState } from "react";
-import { Card, Container, Row, Col, Spinner, Alert } from "react-bootstrap";
-import Button from "@mui/material/Button";
-import { styled } from "@mui/material/styles";
-import Box from "@mui/material/Box";
-import CssBaseline from "@mui/material/CssBaseline";
-import MuiAppBar from "@mui/material/AppBar";
-import Toolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
-import IconButton from "@mui/material/IconButton";
+import axios from "axios";
+import {
+  CircularProgress,
+  Alert,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  AppBar,
+  Toolbar,
+  Typography,
+  IconButton,
+  Menu,
+  MenuItem,
+} from "@mui/material";
+import { Card, Container, Row, Col } from "react-bootstrap";
+import AddIcon from "@mui/icons-material/Add";
 import AccountCircle from "@mui/icons-material/AccountCircle";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
+import LogoutIcon from "@mui/icons-material/Logout";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-import LogoutIcon from "@mui/icons-material/Logout";
-import "./dashboard.css";
-
-const Main = styled("main")(({ theme }) => ({
-  flexGrow: 1,
-  padding: theme.spacing(3),
-}));
-
-const BolderTypography = styled(Typography)({
-  fontWeight: "bold",
-});
-
-const AppBar = styled(MuiAppBar)(({ theme }) => ({
-  backgroundColor: "white",
-  color: "#000000",
-}));
-
-const CustomToolbar = styled(Toolbar)(({ theme }) => ({
-  height: "100px",
-}));
-
-const Users = () => {
-  const [users, setUsers] = useState([]);
+const Surveyors = () => {
+  const [surveyors, setSurveyors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const [currentTime, setCurrentTime] = useState(new Date());
+  // State for managing the dialog
+  const [openDialog, setOpenDialog] = useState(false);
 
-  const handleLogout = () => {
-    localStorage.removeItem("admin_token");
-    window.location.href = "/admin_login";
-  };
+  // State for form fields
+  const [newSurveyor, setNewSurveyor] = useState({
+    name: "",
+    email: "",
+    password: "",
+    mobile: "",
+    address: "",
+  });
 
+  // State for handling success and error messages
+  const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+
+  // Validation errors state
+  const [nameError, setNameError] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [mobileError, setMobileError] = useState("");
+  const [addressError, setAddressError] = useState("");
+
+  // State for managing menu
   const [anchorEl, setAnchorEl] = useState(null);
   const menuOpen = Boolean(anchorEl);
 
+  // Fetch surveyor data on component mount
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await fetch(
-          "https://luisnellai.xyz/siraj/admin/getAllUsers.php"
-        );
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        const data = await response.json();
-        setUsers(data);
-        console.log(data);
-        setLoading(false);
-      } catch (error) {
-        setError(error);
-        setLoading(false);
-      }
-    };
-
-    fetchUsers();
+    fetchSurveyors();
   }, []);
 
-  if (loading) {
-    return (
-      <Container className="text-center">
-        <Spinner animation="border" role="status">
-          <span className="sr-only">Loading...</span>
-        </Spinner>
-      </Container>
-    );
-  }
+  // Function to fetch surveyor data
+  const fetchSurveyors = async () => {
+    try {
+      const response = await axios.get(
+        "https://luisnellai.xyz/siraj/admin/getAllUsers.php"
+      );
+      setSurveyors(response.data);
+      setLoading(false);
+    } catch (error) {
+      setError(error);
+      setLoading(false);
+    }
+  };
 
-  if (error) {
-    return (
-      <Container className="text-center">
-        <Alert variant="danger">Error: {error.message}</Alert>
-      </Container>
-    );
-  }
+  // Function to handle opening the dialog
+  const handleOpenDialog = () => {
+    setOpenDialog(true);
+  };
 
+  // Function to handle closing the dialog
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    // Reset form fields and validation errors when dialog is closed
+    setNewSurveyor({
+      name: "",
+      email: "",
+      password: "",
+      mobile: "",
+      address: "",
+    });
+    setNameError("");
+    setEmailError("");
+    setPasswordError("");
+    setMobileError("");
+    setAddressError("");
+  };
+
+  // Function to handle input change in form fields
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setNewSurveyor((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    // Reset validation errors when user starts typing
+    switch (name) {
+      case "name":
+        setNameError("");
+        break;
+      case "email":
+        setEmailError("");
+        break;
+      case "password":
+        setPasswordError("");
+        break;
+      case "mobile":
+        setMobileError("");
+        break;
+      case "address":
+        setAddressError("");
+        break;
+      default:
+        break;
+    }
+  };
+
+  // Function to validate form fields before submission
+  const validateForm = () => {
+    let isValid = true;
+
+    if (!newSurveyor.name) {
+      setNameError("Name is required");
+      isValid = false;
+    }
+    if (!newSurveyor.email) {
+      setEmailError("Email is required");
+      isValid = false;
+    } else if (!/\S+@\S+\.\S+/.test(newSurveyor.email)) {
+      setEmailError("Email is invalid");
+      isValid = false;
+    }
+    if (!newSurveyor.password) {
+      setPasswordError("Password is required");
+      isValid = false;
+    }
+    if (!newSurveyor.mobile) {
+      setMobileError("Mobile number is required");
+      isValid = false;
+    } else if (!/^\d{10}$/.test(newSurveyor.mobile)) {
+      setMobileError("Mobile number is invalid (must be 10 digits)");
+      isValid = false;
+    }
+    if (!newSurveyor.address) {
+      setAddressError("Address is required");
+      isValid = false;
+    }
+
+    return isValid;
+  };
+
+  // Function to handle form submission
+  const handleAddSurveyor = async () => {
+    if (validateForm()) {
+      try {
+        const response = await axios.post(
+          "https://luisnellai.xyz/siraj/admin/add_user.php",
+          newSurveyor
+        );
+        setSuccessMessage("Surveyor added successfully!");
+        handleCloseDialog();
+        fetchSurveyors(); // Refresh surveyor list after adding new surveyor
+      } catch (error) {
+        setErrorMessage("Failed to add surveyor");
+        console.error("Error adding surveyor:", error);
+      }
+    } else {
+      setErrorMessage("Please fill in all fields correctly");
+    }
+  };
+
+  // Function to handle menu open
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
   };
 
+  // Function to handle menu close
   const handleMenuClose = () => {
     setAnchorEl(null);
   };
@@ -115,99 +208,218 @@ const Users = () => {
     window.location.href = `/viewSurvey/${user_id}`;
   };
 
-  return (
-    <Container>
-      <h1 className=" my-4">Users</h1>
-      <Box sx={{ display: "flex" }}>
-        <CssBaseline />
-        <AppBar position="fixed">
-          <CustomToolbar>
-            <BolderTypography
-              variant="h5"
-              noWrap
-              component="div"
-              sx={{ flexGrow: 1 }}
-            >
-              Hello, GIS!
-            </BolderTypography>
+  // Function to handle logout
+  const handleLogout = () => {
+    localStorage.removeItem("admin_token");
+    window.location.href = "/";
+  };
 
-            <IconButton
-              aria-label="account of current user"
-              aria-controls="menu-appbar"
-              aria-haspopup="true"
-              color="inherit"
-              onClick={handleMenuOpen}
-            >
-              <AccountCircle style={{ fontSize: "30px" }} />
-            </IconButton>
-            <Menu
-              id="menu-appbar"
-              anchorEl={anchorEl}
-              open={menuOpen}
-              onClose={handleMenuClose}
-              anchorOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
-            >
-              <MenuItem onClick={handleLogout}>
-                <ListItemIcon>
-                  <LogoutIcon />
-                </ListItemIcon>
-                <ListItemText primary="Logout" />
-              </MenuItem>
-            </Menu>
-          </CustomToolbar>
-        </AppBar>
-      </Box>
-      <Main
-        sx={{
-          marginTop: "30px",
-          width: "100%",
+  if (loading) {
+    return (
+      <Container
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
         }}
       >
-        <Row>
-          {users.map((user) => (
-            <Col key={user.user_id} md={4} className="mb-4">
+        <CircularProgress />
+      </Container>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container>
+        <Alert variant="danger">Error fetching data: {error.message}</Alert>
+      </Container>
+    );
+  }
+
+  return (
+    <>
+      <AppBar position="static">
+        <Toolbar>
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+            Surveyor Management
+          </Typography>
+          <IconButton
+            size="large"
+            aria-label="account of current user"
+            aria-controls="menu-appbar"
+            aria-haspopup="true"
+            onClick={handleMenuOpen}
+            color="inherit"
+          >
+            <AccountCircle />
+          </IconButton>
+          <Menu
+            id="menu-appbar"
+            anchorEl={anchorEl}
+            anchorOrigin={{
+              vertical: "top",
+              horizontal: "right",
+            }}
+            keepMounted
+            transformOrigin={{
+              vertical: "top",
+              horizontal: "right",
+            }}
+            open={menuOpen}
+            onClose={handleMenuClose}
+          >
+            <MenuItem onClick={handleLogout}>
+              <ListItemIcon>
+                <LogoutIcon fontSize="small" />
+              </ListItemIcon>
+              <Typography variant="inherit">Logout</Typography>
+            </MenuItem>
+          </Menu>
+        </Toolbar>
+      </AppBar>
+      <br />
+      <br />
+      <br />
+      <Container>
+        {/* Toolbar */}
+        {/* Main content */}
+        {/* <Button
+          variant="contained"
+          color="primary"
+          style={{ marginBottom: "1rem" }}
+          onClick={handleOpenDialog}
+          endIcon={<AddIcon />}
+        >
+          Add Surveyor
+        </Button> */}
+        <Row xs={1} md={2} className="g-4">
+          {surveyors.map((surveyor) => (
+            <Col key={surveyor.id}>
               <Card>
                 <Card.Body>
-                  <Card.Title>{user.name}</Card.Title>
+                  <Card.Title>{surveyor.name}</Card.Title>
                   <Card.Text>
-                    <strong>Email:</strong> {user.email}
+                    <strong>Email:</strong> {surveyor.email}
                     <br />
-                    {/* Add more fields as necessary */}
+                    <strong>Mobile:</strong> {surveyor.mobile}
+                    <br />
+                    <br />
+                    <Button
+                      onClick={() => handleCardClick(surveyor.user_id)}
+                      style={{ cursor: "pointer" }}
+                    >
+                      Assign Task
+                    </Button>
+                    <Button
+                      onClick={() => handleviewClick(surveyor.user_id)}
+                      style={{ cursor: "pointer" }}
+                    >
+                      View Task
+                    </Button>
+                    <Button
+                      onClick={() => handleviewSurvey(surveyor.user_id)}
+                      style={{ cursor: "pointer" }}
+                    >
+                      View Survey Data
+                    </Button>
                   </Card.Text>
-
-                  <Button
-                    onClick={() => handleCardClick(user.user_id)}
-                    style={{ cursor: "pointer" }}
-                  >
-                    Assign Task
-                  </Button>
-                  <Button
-                    onClick={() => handleviewClick(user.user_id)}
-                    style={{ cursor: "pointer" }}
-                  >
-                    View Task
-                  </Button>
-                  <Button
-                    onClick={() => handleviewSurvey(user.user_id)}
-                    style={{ cursor: "pointer" }}
-                  >
-                    View Survey Data
-                  </Button>
                 </Card.Body>
               </Card>
             </Col>
           ))}
         </Row>
-      </Main>
-    </Container>
+        {/* Dialog for adding new surveyor */}
+        <Dialog open={openDialog} onClose={handleCloseDialog}>
+          <DialogTitle>Add New Surveyor</DialogTitle>
+          <DialogContent>
+            <TextField
+              autoFocus
+              margin="dense"
+              id="name"
+              name="name"
+              label="Name"
+              type="text"
+              fullWidth
+              value={newSurveyor.name}
+              onChange={handleInputChange}
+              error={!!nameError}
+              helperText={nameError}
+            />
+            <TextField
+              margin="dense"
+              id="email"
+              name="email"
+              label="Email Address"
+              type="email"
+              fullWidth
+              value={newSurveyor.email}
+              onChange={handleInputChange}
+              error={!!emailError}
+              helperText={emailError}
+            />
+            <TextField
+              margin="dense"
+              id="password"
+              name="password"
+              label="Password"
+              type="text"
+              fullWidth
+              value={newSurveyor.password}
+              onChange={handleInputChange}
+              error={!!passwordError}
+              helperText={passwordError}
+            />
+            <TextField
+              margin="dense"
+              id="mobile"
+              name="mobile"
+              label="Mobile"
+              type="text"
+              fullWidth
+              value={newSurveyor.mobile}
+              onChange={handleInputChange}
+              error={!!mobileError}
+              helperText={mobileError}
+            />
+            <TextField
+              margin="dense"
+              id="address"
+              name="address"
+              label="Address"
+              type="text"
+              fullWidth
+              value={newSurveyor.address}
+              onChange={handleInputChange}
+              error={!!addressError}
+              helperText={addressError}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseDialog}>Cancel</Button>
+            <Button
+              onClick={handleAddSurveyor}
+              variant="contained"
+              color="primary"
+            >
+              Add Surveyor
+            </Button>
+          </DialogActions>
+        </Dialog>
+        {/* Success and Error Messages */}
+        {successMessage && (
+          <Alert severity="success" style={{ marginTop: "1rem" }}>
+            {successMessage}
+          </Alert>
+        )}
+        {errorMessage && (
+          <Alert severity="error" style={{ marginTop: "1rem" }}>
+            {errorMessage}
+          </Alert>
+        )}
+      </Container>
+    </>
   );
 };
 
-export default Users;
+export default Surveyors;

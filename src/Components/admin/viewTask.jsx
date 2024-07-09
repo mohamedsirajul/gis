@@ -15,7 +15,11 @@ import {
   TableRow,
   TableCell,
   Paper,
+  IconButton,
+  AppBar,
+  Toolbar,
 } from "@mui/material";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 const ViewSurvey = () => {
   const { user_id } = useParams();
@@ -52,38 +56,57 @@ const ViewSurvey = () => {
     return <Alert severity="error">Error: {error.message}</Alert>;
   }
 
+  const handleBack = () => {
+    window.location.href = "/users";
+  };
+
   return (
-    <Container>
-      <Card variant="outlined" style={{ marginTop: "20px" }}>
-        <CardContent>
-          <Typography variant="h6" component="h3" style={{ marginTop: "20px" }}>
-            Assigned Task Information
-          </Typography>
-          <TableContainer component={Paper}>
-            <Table sx={{ minWidth: 650 }} aria-label="building-table">
-              <TableHead>
-                <TableRow>
-                  <TableCell>User Id</TableCell>
-                  <TableCell>Ward Name</TableCell>
-                  <TableCell>Street Name</TableCell>
-                  <TableCell>Assessment No</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {tasks.map((property, index) => (
-                  <TableRow key={index}>
-                    <TableCell>{property.user_id}</TableCell>
-                    <TableCell>{property.WardName}</TableCell>
-                    <TableCell>{property.StreetName}</TableCell>
-                    <TableCell>{property.AssesmentNo}</TableCell>
+    <>
+      <AppBar position="static">
+        <Toolbar>
+          <IconButton edge="start" color="inherit" onClick={handleBack}>
+            <ArrowBackIcon />
+          </IconButton>
+          <Typography variant="h6">Assigned Task Information</Typography>
+        </Toolbar>
+      </AppBar>
+      <br />
+      <Container>
+        <Card variant="outlined" style={{ marginTop: "20px" }}>
+          <CardContent>
+            <Typography
+              variant="h6"
+              component="h3"
+              style={{ marginTop: "20px" }}
+            >
+              Assigned Task Information
+            </Typography>
+            <TableContainer component={Paper}>
+              <Table sx={{ minWidth: 650 }} aria-label="building-table">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>User Id</TableCell>
+                    <TableCell>Ward Name</TableCell>
+                    <TableCell>Street Name</TableCell>
+                    <TableCell>Assessment No</TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </CardContent>
-      </Card>
-    </Container>
+                </TableHead>
+                <TableBody>
+                  {tasks.map((property, index) => (
+                    <TableRow key={index}>
+                      <TableCell>{property.user_id}</TableCell>
+                      <TableCell>{property.WardName}</TableCell>
+                      <TableCell>{property.StreetName}</TableCell>
+                      <TableCell>{property.AssesmentNo}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </CardContent>
+        </Card>
+      </Container>
+    </>
   );
 };
 

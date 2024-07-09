@@ -26,7 +26,7 @@ import {
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 
-const ViewSurvey = () => {
+const SViewSurvey = () => {
   const { user_id } = useParams();
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -55,9 +55,6 @@ const ViewSurvey = () => {
 
     fetchProperties();
   }, [user_id]);
-  const handleBack = () => {
-    window.location.href = "/users";
-  };
 
   const handleOpenDialog = (title, content) => {
     setDialogTitle(title);
@@ -81,14 +78,6 @@ const ViewSurvey = () => {
 
   return (
     <>
-      <AppBar position="static">
-        <Toolbar>
-          <IconButton edge="start" color="inherit" onClick={handleBack}>
-            <ArrowBackIcon />
-          </IconButton>
-          <Typography variant="h6">Survey Data</Typography>
-        </Toolbar>
-      </AppBar>
       <Container>
         {properties.length === 0 ? (
           <Alert severity="info">
@@ -263,4 +252,4 @@ const ViewSurvey = () => {
   );
 };
 
-export default ViewSurvey;
+export default SViewSurvey;

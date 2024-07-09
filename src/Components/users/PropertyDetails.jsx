@@ -460,7 +460,7 @@ function PropertyDetails() {
     message.success("Logged out", 5);
     localStorage.removeItem("user_token");
 
-    window.location.href = "/user_login";
+    window.location.href = "/";
 
     // window.href = "/user_login";
   };

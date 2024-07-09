@@ -16,7 +16,7 @@ const defaultTheme = createTheme();
 const StyledAvatar = styled(Avatar)(({ theme }) => ({
   width: theme.spacing(10),
   height: theme.spacing(10),
-  backgroundColor: theme.palette.secondary.main,
+  backgroundColor: "#eb3499",
   "& img": {
     width: "100%",
     height: "auto",
@@ -24,7 +24,7 @@ const StyledAvatar = styled(Avatar)(({ theme }) => ({
   },
 }));
 
-export default function SuperAdminLogin() {
+export default function VfaAdminLogin() {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({ email: "", password: "" });
   const [error, setError] = useState(null);
@@ -63,7 +63,7 @@ export default function SuperAdminLogin() {
 
     try {
       const response = await fetch(
-        `https://luisnellai.xyz/siraj/admin/sadmin_login.php`,
+        `https://luisnellai.xyz/siraj/admin/vfa_login.php`,
         {
           method: "POST",
           headers: {
@@ -80,9 +80,9 @@ export default function SuperAdminLogin() {
       const data = await response.json();
       if (data.status === "success") {
         const token = data.token;
-        localStorage.setItem("super_admin_token", token);
+        localStorage.setItem("vfa_token", token);
 
-        window.location.href = "/dashboard";
+        window.location.href = "/vfa";
       } else {
         throw new Error(data.message || "Login failed");
       }
@@ -123,7 +123,7 @@ export default function SuperAdminLogin() {
         >
           <StyledAvatar />
           <Typography component="h3" variant="h5">
-            Super Admin Login
+            ViewFloorAnalysis Login
           </Typography>
           <Box
             component="form"
@@ -193,7 +193,9 @@ export default function SuperAdminLogin() {
               sx={{
                 mt: 2,
                 mb: 2,
-                backgroundColor: "violet",
+              }}
+              style={{
+                backgroundColor: "#eb3499",
                 color: "white",
               }}
             >

@@ -19,8 +19,13 @@ import {
   OutlinedInput,
   ListItemText,
   Checkbox,
+  IconButton,
+  AppBar,
+  Toolbar,
+  Typography,
 } from "@mui/material";
 
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
 const MenuProps = {
@@ -249,7 +254,9 @@ const AssignTask = () => {
       setLoading(false);
     }
   };
-
+  const handleBack = () => {
+    window.location.href = "/users";
+  };
   if (loading) {
     return (
       <Container sx={{ textAlign: "center" }}>
@@ -283,184 +290,200 @@ const AssignTask = () => {
   const filteredStreets = getFilteredStreets(taskData.WardName);
 
   return (
-    <Container>
-      <h1>Assign Task</h1>
+    <>
+      <AppBar position="static">
+        <Toolbar>
+          <IconButton edge="start" color="inherit" onClick={handleBack}>
+            <ArrowBackIcon />
+          </IconButton>
+          <Typography variant="h6">Assign Task</Typography>
+        </Toolbar>
+      </AppBar>
+      <br />
+      <Container>
+        <h1>Assign Task</h1>
 
-      <FormControl fullWidth sx={{ mb: 2 }}>
-        <InputLabel id="WardName-label">Ward Name</InputLabel>
-        <Select
-          labelId="WardName-label"
-          id="WardName"
-          name="WardName"
-          value={taskData.WardName}
-          onChange={(e) => handleWardChange(e)}
-          required
-        >
-          <MenuItem value="">
-            <em>Select Ward</em>
-          </MenuItem>
-          {uniqueWards.map((ward) => (
-            <MenuItem key={ward} value={ward}>
-              {ward}
+        <FormControl fullWidth sx={{ mb: 2 }}>
+          <InputLabel id="WardName-label">Ward Name</InputLabel>
+          <Select
+            labelId="WardName-label"
+            id="WardName"
+            name="WardName"
+            value={taskData.WardName}
+            onChange={(e) => handleWardChange(e)}
+            required
+          >
+            <MenuItem value="">
+              <em>Select Ward</em>
             </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+            {uniqueWards.map((ward) => (
+              <MenuItem key={ward} value={ward}>
+                {ward}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
 
-      <FormControl fullWidth sx={{ mb: 2 }}>
-        <InputLabel id="StreetName-label">Street Name</InputLabel>
-        <Select
-          labelId="StreetName-label"
-          id="StreetName"
-          name="StreetName"
-          multiple
-          value={selectedStreets}
-          onChange={(e) => handleStreetChange(e)}
-          input={<OutlinedInput label="Street Name" />}
-          renderValue={(selected) => selected.join(", ")}
-          MenuProps={MenuProps}
-        >
-          <MenuItem value="All">
-            <Checkbox
-              checked={selectedStreets.length === filteredStreets.length}
-              indeterminate={
-                selectedStreets.length > 0 &&
-                selectedStreets.length < filteredStreets.length
-              }
-              onChange={(e) =>
-                setSelectedStreets(e.target.checked ? filteredStreets : [])
-              }
-            />
-            <ListItemText primary="Select All" />
-          </MenuItem>
-          {filteredStreets.map((street) => (
-            <MenuItem key={street} value={street}>
-              <Checkbox checked={selectedStreets.indexOf(street) > -1} />
-              <ListItemText primary={street} />
+        <FormControl fullWidth sx={{ mb: 2 }}>
+          <InputLabel id="StreetName-label">Street Name</InputLabel>
+          <Select
+            labelId="StreetName-label"
+            id="StreetName"
+            name="StreetName"
+            multiple
+            value={selectedStreets}
+            onChange={(e) => handleStreetChange(e)}
+            input={<OutlinedInput label="Street Name" />}
+            renderValue={(selected) => selected.join(", ")}
+            MenuProps={MenuProps}
+          >
+            <MenuItem value="All">
+              <Checkbox
+                checked={selectedStreets.length === filteredStreets.length}
+                indeterminate={
+                  selectedStreets.length > 0 &&
+                  selectedStreets.length < filteredStreets.length
+                }
+                onChange={(e) =>
+                  setSelectedStreets(e.target.checked ? filteredStreets : [])
+                }
+              />
+              <ListItemText primary="Select All" />
             </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+            {filteredStreets.map((street) => (
+              <MenuItem key={street} value={street}>
+                <Checkbox checked={selectedStreets.indexOf(street) > -1} />
+                <ListItemText primary={street} />
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
 
-      {additionalSelections.map((selection, index) => {
-        const additionalFilteredStreets = getFilteredStreets(
-          selection.WardName
-        );
+        {additionalSelections.map((selection, index) => {
+          const additionalFilteredStreets = getFilteredStreets(
+            selection.WardName
+          );
 
-        return (
-          <div key={index}>
-            <FormControl fullWidth sx={{ mb: 2 }}>
-              <InputLabel id={`additional-ward-${index}`}>Ward Name</InputLabel>
-              <Select
-                labelId={`additional-ward-${index}`}
-                id={`additional-ward-${index}`}
-                name="WardName"
-                value={selection.WardName}
-                onChange={(e) => handleWardChange(e, index)}
-                required
-                disabled={additionalSelections.some(
-                  (s, idx) => s.WardName == selection.WardName && idx !== index
-                )}
-              >
-                <MenuItem value="">
-                  <em>Select Ward</em>
-                </MenuItem>
-                {uniqueWards
-                  .filter((ward) => ward !== taskData.WardName)
-                  .map((ward) => (
-                    <MenuItem key={ward} value={ward}>
-                      {ward}
+          return (
+            <div key={index}>
+              <FormControl fullWidth sx={{ mb: 2 }}>
+                <InputLabel id={`additional-ward-${index}`}>
+                  Ward Name
+                </InputLabel>
+                <Select
+                  labelId={`additional-ward-${index}`}
+                  id={`additional-ward-${index}`}
+                  name="WardName"
+                  value={selection.WardName}
+                  onChange={(e) => handleWardChange(e, index)}
+                  required
+                  disabled={additionalSelections.some(
+                    (s, idx) =>
+                      s.WardName == selection.WardName && idx !== index
+                  )}
+                >
+                  <MenuItem value="">
+                    <em>Select Ward</em>
+                  </MenuItem>
+                  {uniqueWards
+                    .filter((ward) => ward !== taskData.WardName)
+                    .map((ward) => (
+                      <MenuItem key={ward} value={ward}>
+                        {ward}
+                      </MenuItem>
+                    ))}
+                </Select>
+              </FormControl>
+
+              <FormControl fullWidth sx={{ mb: 2 }}>
+                <InputLabel id={`additional-street-${index}`}>
+                  Street Name
+                </InputLabel>
+                <Select
+                  labelId={`additional-street-${index}`}
+                  id={`additional-street-${index}`}
+                  name="StreetName"
+                  multiple
+                  value={selection.StreetName}
+                  onChange={(e) => handleStreetChange(e, index)}
+                  input={<OutlinedInput label="Street Name" />}
+                  renderValue={(selected) => selected.join(", ")}
+                  MenuProps={MenuProps}
+                >
+                  <MenuItem value="All">
+                    <Checkbox
+                      checked={
+                        selection.StreetName.length ===
+                        additionalFilteredStreets.length
+                      }
+                      indeterminate={
+                        selection.StreetName.length > 0 &&
+                        selection.StreetName.length <
+                          additionalFilteredStreets.length
+                      }
+                      onChange={(e) =>
+                        setAdditionalSelections((prev) =>
+                          prev.map((s, idx) =>
+                            idx === index
+                              ? {
+                                  ...s,
+                                  StreetName: e.target.checked
+                                    ? additionalFilteredStreets
+                                    : [],
+                                }
+                              : s
+                          )
+                        )
+                      }
+                    />
+                    <ListItemText primary="Select All" />
+                  </MenuItem>
+                  {additionalFilteredStreets.map((street) => (
+                    <MenuItem key={street} value={street}>
+                      <Checkbox
+                        checked={selection.StreetName.includes(street)}
+                      />
+                      <ListItemText primary={street} />
                     </MenuItem>
                   ))}
-              </Select>
-            </FormControl>
+                </Select>
+              </FormControl>
+            </div>
+          );
+        })}
 
-            <FormControl fullWidth sx={{ mb: 2 }}>
-              <InputLabel id={`additional-street-${index}`}>
-                Street Name
-              </InputLabel>
-              <Select
-                labelId={`additional-street-${index}`}
-                id={`additional-street-${index}`}
-                name="StreetName"
-                multiple
-                value={selection.StreetName}
-                onChange={(e) => handleStreetChange(e, index)}
-                input={<OutlinedInput label="Street Name" />}
-                renderValue={(selected) => selected.join(", ")}
-                MenuProps={MenuProps}
-              >
-                <MenuItem value="All">
-                  <Checkbox
-                    checked={
-                      selection.StreetName.length ===
-                      additionalFilteredStreets.length
-                    }
-                    indeterminate={
-                      selection.StreetName.length > 0 &&
-                      selection.StreetName.length <
-                        additionalFilteredStreets.length
-                    }
-                    onChange={(e) =>
-                      setAdditionalSelections((prev) =>
-                        prev.map((s, idx) =>
-                          idx === index
-                            ? {
-                                ...s,
-                                StreetName: e.target.checked
-                                  ? additionalFilteredStreets
-                                  : [],
-                              }
-                            : s
-                        )
-                      )
-                    }
-                  />
-                  <ListItemText primary="Select All" />
-                </MenuItem>
-                {additionalFilteredStreets.map((street) => (
-                  <MenuItem key={street} value={street}>
-                    <Checkbox checked={selection.StreetName.includes(street)} />
-                    <ListItemText primary={street} />
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </div>
-        );
-      })}
+        <Button variant="contained" onClick={addNewSelection} sx={{ mb: 2 }}>
+          Add Ward and Street
+        </Button>
 
-      <Button variant="contained" onClick={addNewSelection} sx={{ mb: 2 }}>
-        Add Ward and Street
-      </Button>
-
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Property ID</TableCell>
-              <TableCell>Ward Name</TableCell>
-              <TableCell>Street Name</TableCell>
-              <TableCell>Assessment Number</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filteredProperties.map((property) => (
-              <TableRow key={property.id}>
-                <TableCell>{property.s_no}</TableCell>
-                <TableCell>{property.WardName}</TableCell>
-                <TableCell>{property.StreetName}</TableCell>
-                <TableCell>{property.AssesmentNo}</TableCell>
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Property ID</TableCell>
+                <TableCell>Ward Name</TableCell>
+                <TableCell>Street Name</TableCell>
+                <TableCell>Assessment Number</TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableHead>
+            <TableBody>
+              {filteredProperties.map((property) => (
+                <TableRow key={property.id}>
+                  <TableCell>{property.s_no}</TableCell>
+                  <TableCell>{property.WardName}</TableCell>
+                  <TableCell>{property.StreetName}</TableCell>
+                  <TableCell>{property.AssesmentNo}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
 
-      <Button variant="contained" onClick={handleSubmit} sx={{ mt: 2 }}>
-        Assign Task
-      </Button>
-    </Container>
+        <Button variant="contained" onClick={handleSubmit} sx={{ mt: 2 }}>
+          Assign Task
+        </Button>
+      </Container>
+    </>
   );
 };
 

@@ -10,15 +10,10 @@ import {
   Spinner,
   Table,
 } from "react-bootstrap";
-import {
-  AppBar,
-  Toolbar,
-  Typography,
-  Button as MUIButton,
-} from "@mui/material";
+
 import "bootstrap/dist/css/bootstrap.min.css";
 
-function Addcsv() {
+function AddDroneCsv() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [csvData, setCsvData] = useState([]);
@@ -54,7 +49,7 @@ function Addcsv() {
 
     try {
       const response = await axios.post(
-        "https://luisnellai.xyz/siraj/addcsv.php",
+        "https://luisnellai.xyz/siraj/adddronecsv.php", // Adjust the URL as per your server endpoint for drone CSV
         formData,
         {
           headers: {
@@ -72,20 +67,15 @@ function Addcsv() {
     }
   };
 
-  // const handleLogout = () => {
-  //   localStorage.removeItem("super_admin_token");
-  //   window.location.href = "/sadmin_login";
-  // };
-
   return (
     <>
       <Container>
         <Row>
           <Col>
-            <h3>Upload Property CSV</h3>
+            <h3>Upload Drone CSV</h3>
             <Form onSubmit={handleSubmit}>
               <Form.Group controlId="formFile" className="mb-3">
-                <Form.Label>Upload CSV File</Form.Label>
+                <Form.Label>Upload Drone CSV File</Form.Label>
                 <Form.Control
                   type="file"
                   accept=".csv"
@@ -136,4 +126,4 @@ function Addcsv() {
   );
 }
 
-export default Addcsv;
+export default AddDroneCsv;

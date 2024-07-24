@@ -31,6 +31,7 @@ import ViewVfa from "./Components/superAdmin/view_vfa";
 import Homes from "./Components/Home";
 import AddDroneCsv from "./Components/superAdmin/adddronecsv";
 import AddExistingTax from "./Components/superAdmin/addexistingtaxcsv";
+import FilterAd from "./Components/floorAnalysisdata/filter_assessments";
 
 // Function to check if the user is logged in
 const isUserLoggedIn = () => {
@@ -93,6 +94,8 @@ const renderRoutes = () => {
         <Route path="/user_login" element={<Navigate replace to="/fad" />} />
         <Route path="/admin_login" element={<Navigate replace to="/fad" />} />
         <Route path="/fad" element={<Fad />} />
+        <Route path="/filterad" element={<FilterAd />} />
+
         <Route path="*" element={<Navigate to="/fad" replace />} />
       </Routes>
     );

@@ -62,6 +62,9 @@ const Fad = () => {
     localStorage.removeItem("fad_token");
     window.location.href = "/";
   };
+  const FilterAd = () => {
+    window.location.href = "/filterad";
+  }
 
   const fetchData = () => {
     fetch("https://luisnellai.xyz/siraj/flooranalysisdata.php")
@@ -304,13 +307,14 @@ const Fad = () => {
       <Container>
         <Card variant="outlined" style={{ marginTop: "20px" }}>
           <CardContent>
-            <Typography
-              variant="h6"
-              component="h3"
-              style={{ marginTop: "20px", textAlign: "center" }}
-            >
-              <b>Assessment Tax Estimation</b>
-            </Typography>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+  <Typography variant="h6" component="h3" style={{ marginTop: "20px", textAlign: "center" }}>
+    <b>Assessment Tax Estimation</b>
+  </Typography>
+  <Button style={{ marginTop: "20px" , backgroundColor:"#f05b4d", color:"white" }} onClick={FilterAd} >Filter Assessments Information</Button>
+</div>
+
+
             <TableContainer component={Paper} style={{ marginTop: "20px" }}>
               <Table>
                 <TableHead
@@ -554,7 +558,6 @@ const Fad = () => {
             </TableContainer>
           </CardContent>
         </Card>
-
         <Dialog
           open={openTaxDialog}
           onClose={handleCloseTaxDialog}
@@ -2248,6 +2251,8 @@ const Fad = () => {
             </Button>
           </DialogActions>
         </Dialog>
+
+
       </Container>
     </>
   );

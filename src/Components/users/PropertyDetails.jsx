@@ -661,7 +661,7 @@ function PropertyDetails() {
                 </Col>
                 <Col md={6} className="mt-3">
                   <FormControl fullWidth>
-                    <InputLabel>Building Used As</InputLabel>
+                    {/* <InputLabel>Building Used As</InputLabel>
                     <Select
                       label="Building Used As"
                       variant="outlined"
@@ -675,9 +675,9 @@ function PropertyDetails() {
                           {option}
                         </MenuItem>
                       ))}
-                    </Select>
+                    </Select> */}
 
-                    {/* <TextField
+                    <TextField
                       label="Building Used As"
                       variant="outlined"
                       value={usagename}
@@ -685,7 +685,7 @@ function PropertyDetails() {
                         setSelectedBuildingUsedAs(e.target.value)
                       }
                       disabled
-                    /> */}
+                    />
                   </FormControl>
                 </Col>
               </Row>

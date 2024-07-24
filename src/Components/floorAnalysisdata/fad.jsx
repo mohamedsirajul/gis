@@ -353,7 +353,7 @@ const Fad = () => {
                         color: "white",
                       }}
                     >
-                      Floor (in Sq.ft)
+                      Floor
                     </TableCell>
                     <TableCell
                       style={{

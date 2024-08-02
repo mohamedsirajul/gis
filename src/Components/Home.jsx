@@ -49,7 +49,7 @@ const Home = () => {
       }}
     >
       <Typography variant="h5">
-        <b>Terralens Tax Navigator</b>
+        <b>GIS Tax Navigator</b>
       </Typography>
       <StyledAvatar />
 
@@ -92,7 +92,7 @@ const Home = () => {
           <MenuItem value="/vfa_admin_login">ATCR Admin Login</MenuItem>
         </Select>
       </FormControl>
-      <Box
+      {/* <Box
         sx={{
           position: "absolute",
           bottom: 0,
@@ -105,7 +105,7 @@ const Home = () => {
         <Typography variant="body2" color="textSecondary">
           © 2024 Terralens Innovations Private Limited. All rights reserved.
         </Typography>
-      </Box>
+      </Box> */}
     </Box>
   );
 };

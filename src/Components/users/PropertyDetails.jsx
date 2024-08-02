@@ -463,7 +463,6 @@ function PropertyDetails() {
     setOpenSnackbar(false);
   };
   const onLogOut = async () => {
-    message.success("Logged out", 5);
     localStorage.removeItem("user_token");
 
     window.location.href = "/";

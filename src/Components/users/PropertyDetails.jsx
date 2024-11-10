@@ -3,6 +3,7 @@ import "./PropertyDetails.css";
 import { Container, Row, Col } from "react-bootstrap";
 import { message } from "antd";
 import { useNavigate } from "react-router-dom";
+import { Autocomplete } from "@mui/material"; // Import Autocomplete
 
 import {
   AppBar,
@@ -25,7 +26,7 @@ import {
   Step,
   StepLabel,
   CircularProgress,
-  Snackbar,
+  Snackbar,Dialog, DialogActions, DialogContent, DialogTitle,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -33,39 +34,67 @@ import MuiAlert from "@mui/material/Alert";
 // const navigate = useNavigate();
 
 const buildingTypeOptions = [
-  "Super Structure",
-  "Special Building",
-  "Vacant Land",
-  "Independent Building",
-  "Flats in Multi Storied Building",
-  "Central Government 33%",
-  "Central Government 75%",
-  "State Government",
-  "Cell Phone Tower",
-  "Cinema Theater",
-  "Hospital",
-  "Hotel / Lodging House",
-  "Kalyana Mandapam",
-  "Educational Institution",
-  "Central Government 50%",
-  "Flat",
-  "Hostel",
+  // "Super Structure",
+  // "Special Building",
+  // "Vacant Land",
+  // "Independent Building",
+  // "Flats in Multi Storied Building",
+  // "Central Government 33%",
+  // "Central Government 75%",
+  // "State Government",
+  // "Cell Phone Tower",
+  // "Cinema Theater",
+  // "Hospital",
+  // "Hotel / Lodging House",
+  // "Kalyana Mandapam",
+  // "Educational Institution",
+  // "Central Government 50%",
+  // "Flat",
+  // "Hostel",
+    "Independent Building",
+    "Government Property",
+    "Cinema Theatre" ,
+    "Education Institution",
+    "Hospital" ,
+    "Restaurant / Hotel" ,
+    "Lodges / Residency / PG Hotel" ,
+    "Shopping Mall" ,
+    "Religious Structure"  ,
+    "God own / Warehouse",
+    "Vacant land"
 ];
 
 const buildingUsedAsOptions = [
-  "Mixed",
-  "Residential",
-  "Commercial",
-  "Others",
-  "Vacant Land",
+  // "Mixed",
+  // "Residential",
+  // "Commercial",
+  // "Others",
+  // "Vacant Land",
+  "Permanent",  
+    "Semi-Permanent",  
+    "Shed",  
+    "Vacant Land",  
+    "Under Construction"
+
 ];
 
 const PROPERTY_OWNERSHIP = [
-  "Mixed",
-  "Residential",
-  "Commercial",
-  "Others",
-  "Vacant Land",
+  // "Mixed",
+  // "Residential",
+  // "Commercial",
+  // "Others",
+  // "Vacant Land",
+  "Residence",  
+  "Commercial",  
+  "Mixed",  
+  "Vacant Land",  
+  "Industrials",  
+  "Education Institutions",  
+  "Special Type",  
+  "Government Building",  
+  "Vacant Land",  
+  "Others"   
+
 ];
 
 const FloorusageOptions = [
@@ -86,6 +115,7 @@ function PropertyDetails() {
   const [wardOptions, setWardOptions] = useState([]);
   const [streetOptions, setStreetOptions] = useState([]);
   const [assessmentOptions, setAssessmentOptions] = useState([]);
+  const [OwnerOptions, setOwnerOptions] = useState([]);
 
   //location details
   const [selectedWard, setSelectedWard] = useState("");
@@ -152,9 +182,9 @@ function PropertyDetails() {
   const [errorMessage, setErrorMessage] = useState("");
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const steps = [
-    "Location Details",
+    // "Location Details",
     "Property Info",
-    "Address Details",
+    // "Address Details",
     "Floor Info",
     "Facility Details",
   ];
@@ -262,6 +292,9 @@ function PropertyDetails() {
         console.log(data);
         const uniqueWards = [...new Set(data.map((item) => item.WardName))];
         setWardOptions(uniqueWards);
+
+        const ownerNames = data.map((item) => item.Owner_name);
+        setOwnerOptions(ownerNames);      
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
@@ -307,8 +340,22 @@ function PropertyDetails() {
         .filter((item) => item.StreetName === selectedStreet)
         .map((item) => item.AssesmentNo);
       setAssessmentOptions(assessments);
+    } else {
+      // Show all AssesmentNo if no street is selected
+      const allAssessments = data.map((item) => item.AssesmentNo);
+      setAssessmentOptions(allAssessments);
     }
   }, [selectedStreet, data]);
+
+  // useEffect(() => {
+  //   if (selectedStreet) {
+  //     const assessments = data
+  //       .filter((item) => item.StreetName === selectedStreet)
+  //       .map((item) => item.AssesmentNo);
+  //     setAssessmentOptions(assessments);
+  //   }
+  // }, [selectedStreet, data]);
+
 
   const isStepValid = () => {
     switch (activeStep) {
@@ -470,6 +517,65 @@ function PropertyDetails() {
     // window.href = "/user_login";
   };
 
+   // Function to handle the open dialog action
+   const handleOpenDialog = () => {
+    setOpenDialog(true);
+  };
+
+  // Function to handle the close dialog action
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+  };
+
+  // Handle the change in Ward input
+  const handleWardChange = (event) => {
+    setEditedWard(event.target.value);
+  };
+
+  // Handle the change in Street input
+  const handleStreetChange = (event) => {
+    setEditedStreet(event.target.value);
+  };
+
+  const [openDialog, setOpenDialog] = useState(false); // State to control the dialog
+  const [editedWard, setEditedWard] = useState(""); // State to capture the edited ward
+  const [editedStreet, setEditedStreet] = useState(""); // State to capture the edited street
+
+  // Submit the edited data to the API
+  const handleSubmitEdit = async () => {
+    if (!editedWard || !editedStreet) {
+      message.error("Both Ward and Street must be filled in.");
+      return;
+    }
+
+    try {
+      const response = await fetch("https://luisnellai.xyz/siraj/editstreetdata.php", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          AssessmentNo : selectedBillNo,
+          EditedWard: editedWard, // The edited Ward
+          EditedStreet: editedStreet, // The edited Street
+        }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        message.success("Street and Ward details updated successfully!");
+      } else {
+        message.error("Failed to update street and ward details.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      message.error("An error occurred while updating street and ward details.");
+    } finally {
+      handleCloseDialog(); // Close the dialog after submission
+    }
+  };
+
   return (
     <div>
       <AppBar position="static">
@@ -504,7 +610,7 @@ function PropertyDetails() {
             </Stepper>
           </Col>
         </Row>
-        {activeStep === 0 && (
+        {/* {activeStep === 0 && (
           <Paper elevation={3} style={{ padding: "20px", margin: "20px 0" }}>
             <Typography variant="h5">Location Details</Typography>
             <Box mt={3}>
@@ -552,15 +658,72 @@ function PropertyDetails() {
               </Row>
             </Box>
           </Paper>
-        )}
-        {activeStep === 1 && (
+        )} */}
+        {activeStep === 0 && (
           <Paper elevation={3} style={{ padding: "20px", margin: "20px 0" }}>
             <Typography variant="h5">Property Information</Typography>
             <Box mt={3}>
               <Row className="mt-3">
+                <Col md={6} className="mt-3">
+                  <FormControl fullWidth>
+                    <TextField
+                      label="GIS ID"
+                      onChange={(e) => setGisId(e.target.value)}
+                      variant="outlined"
+                    />
+                  </FormControl>
+                </Col>
+                <Col md={6} className="mt-3">
+                  <FormControl fullWidth>
+                    {/* <InputLabel>Ward</InputLabel>
+                    <Select
+                      label="Ward"
+                      variant="outlined"
+                      value={selectedWard}
+                      onChange={(e) => setSelectedWard(e.target.value)}
+                    >
+                      {wardOptions.map((ward) => (
+                        <MenuItem key={ward} value={ward}>
+                          {ward}
+                        </MenuItem>
+                      ))}
+                    </Select> */}
+                    <Autocomplete
+                        options={wardOptions}
+                        value={selectedWard}
+                        onChange={(e, newValue) => setSelectedWard(newValue)}
+                        renderInput={(params) => <TextField {...params} label="Ward No" variant="outlined" />}
+                      />
+                  </FormControl>
+                </Col>
+                <Col md={6} className="mt-3">
+                  <FormControl fullWidth>
+                    {/* <InputLabel>Street Name</InputLabel>
+                    <Select
+                      label="Street Name"
+                      variant="outlined"
+                      value={selectedStreet}
+                      onChange={(e) => setSelectedStreet(e.target.value)}
+                      disabled={!selectedWard}
+                    >
+                      {streetOptions.map((street) => (
+                        <MenuItem key={street} value={street}>
+                          {street}
+                        </MenuItem>
+                      ))}
+                    </Select> */}
+                    <Autocomplete
+                      options={streetOptions}
+                      value={selectedStreet}
+                      onChange={(e, newValue) => setSelectedStreet(newValue)}
+                      renderInput={(params) => <TextField {...params} label="Road Name" variant="outlined" />}
+                      disabled={!selectedWard}
+                    />
+                  </FormControl>
+                </Col>
                 <Col md={6}>
                   <FormControl fullWidth className="mt-3">
-                    <InputLabel>Property Ownership</InputLabel>
+                    {/* <InputLabel>Property Ownership</InputLabel>
                     <Select
                       label="Property Ownership"
                       value={selectedPROPERTY_OWNERSHIP}
@@ -573,13 +736,19 @@ function PropertyDetails() {
                           {type}
                         </MenuItem>
                       ))}
-                    </Select>
+                    </Select> */}
+                    <Autocomplete
+                      options={PROPERTY_OWNERSHIP}
+                      value={selectedPROPERTY_OWNERSHIP}
+                      onChange={(e, newValue) => setselectedPROPERTY_OWNERSHIP(newValue)}
+                      renderInput={(params) => <TextField {...params} label="Property Usage" variant="outlined" />}
+                    />
                   </FormControl>
                 </Col>
                 <Col md={6}>
                   <FormControl fullWidth className="mt-3">
-                    <InputLabel>Building Type</InputLabel>
-                    <Select
+                    {/* <InputLabel>Building Type</InputLabel> */}
+                    {/* <Select
                       label="Building Type"
                       value={selectedbuildingTypeOptions}
                       onChange={(e) => setbuildingTypeOptions(e.target.value)}
@@ -589,7 +758,14 @@ function PropertyDetails() {
                           {type}
                         </MenuItem>
                       ))}
-                    </Select>
+                    </Select> */}
+                    <Autocomplete
+                      options={buildingTypeOptions}
+                      value={selectedbuildingTypeOptions}
+                      onChange={(e, newValue) => setbuildingTypeOptions(newValue)}
+                      renderInput={(params) => <TextField {...params} label="Property Type" variant="outlined" />}
+                    />
+
                   </FormControl>
                 </Col>
               </Row>
@@ -598,16 +774,16 @@ function PropertyDetails() {
                   <FormControl component="fieldset">
                     <RadioGroup row aria-label="status" name="status">
                       <FormControlLabel
-                        value="active"
+                        value="old"
                         control={<Radio />}
-                        label="Active"
+                        label="Old"
                       />
                       <FormControlLabel
                         value="new"
                         control={<Radio />}
                         label="New"
                       />
-                      <FormControlLabel
+                      {/* <FormControlLabel
                         value="inactive"
                         control={<Radio />}
                         label="Inactive"
@@ -616,7 +792,7 @@ function PropertyDetails() {
                         value="completed"
                         control={<Radio />}
                         label="Completed"
-                      />
+                      /> */}
                     </RadioGroup>
                   </FormControl>
                 </Col>
@@ -624,8 +800,8 @@ function PropertyDetails() {
               <Row className="mt-3">
                 <Col md={6}>
                   <FormControl fullWidth className="mt-3">
-                    <InputLabel>Bill Number</InputLabel>
-                    <Select
+                    {/* <InputLabel>Bill Number</InputLabel> */}
+                    {/* <Select
                       label="Bill Number"
                       value={selectedBillNo}
                       onChange={(e) => setSelectedBillNo(e.target.value)}
@@ -635,7 +811,13 @@ function PropertyDetails() {
                           {bill}
                         </MenuItem>
                       ))}
-                    </Select>
+                    </Select> */}
+                  <Autocomplete
+                    options={assessmentOptions}
+                    value={selectedBillNo}
+                    onChange={(e, newValue) => setSelectedBillNo(newValue)}
+                    renderInput={(params) => <TextField {...params} label="Bill Number" variant="outlined" />}
+                  />
                   </FormControl>
                 </Col>
                 <Col md={6}>
@@ -649,20 +831,12 @@ function PropertyDetails() {
                     />
                   </FormControl>
                 </Col>
+        
                 <Col md={6} className="mt-3">
                   <FormControl fullWidth>
-                    <TextField
-                      label="GIS ID"
-                      onChange={(e) => setGisId(e.target.value)}
-                      variant="outlined"
-                    />
-                  </FormControl>
-                </Col>
-                <Col md={6} className="mt-3">
-                  <FormControl fullWidth>
-                    {/* <InputLabel>Building Used As</InputLabel>
+                    <InputLabel>Construction Type</InputLabel>
                     <Select
-                      label="Building Used As"
+                      label="Construction Type"
                       variant="outlined"
                       value={selectedBuildingUsedAs}
                       onChange={(e) =>
@@ -674,8 +848,8 @@ function PropertyDetails() {
                           {option}
                         </MenuItem>
                       ))}
-                    </Select> */}
-
+                    </Select>
+{/* 
                     <TextField
                       label="Building Used As"
                       variant="outlined"
@@ -684,19 +858,66 @@ function PropertyDetails() {
                         setSelectedBuildingUsedAs(e.target.value)
                       }
                       disabled
-                    />
+                    /> */}
                   </FormControl>
+                </Col>
+                
+                <Col md={6} className="mt-3">
+                  {/* Edit Details Button */}
+                  <Button variant="outlined" color="primary"  onClick={handleOpenDialog} 
+                  disabled={!selectedBillNo} >
+                  
+
+                    Edit Details
+                  </Button>
+
+                  {/* Dialog for Editing Ward and Street */}
+                  <Dialog open={openDialog} onClose={handleCloseDialog}>
+                    <DialogTitle>Edit Ward and Street for <b>{selectedBillNo}</b></DialogTitle>
+                    <DialogContent>
+                      {/* Input for Editing Ward */}
+                      <TextField
+                        label="Edit Ward"
+                        value={editedWard}
+                        onChange={handleWardChange}
+                        fullWidth
+                        margin="normal"
+                      />
+                      {/* Input for Editing Street */}
+                      <TextField
+                        label="Edit Street"
+                        value={editedStreet}
+                        onChange={handleStreetChange}
+                        fullWidth
+                        margin="normal"
+                      />
+                    </DialogContent>
+                    <DialogActions>
+                      <Button onClick={handleCloseDialog} color="secondary">
+                        Cancel
+                      </Button>
+                      <Button onClick={handleSubmitEdit} color="primary">
+                        Submit
+                      </Button>
+                    </DialogActions>
+                  </Dialog>
                 </Col>
               </Row>
               <Row className="mt-3">
                 <Col md={6}>
                   <FormControl fullWidth className="mt-3">
-                    <TextField
+                    {/* <TextField
                       label="Name of Assessee"
                       variant="outlined"
                       value={selectedOwner}
                       onChange={(e) => setSelectedOwner(e.target.value)}
                       disabled
+                    /> */}
+                     <Autocomplete
+                      options={OwnerOptions} // All Owner names including duplicates
+                      value={selectedOwner}
+                      onChange={(e, newValue) => setSelectedOwner(newValue)}
+                      renderInput={(params) => <TextField {...params} label="Name of Assessee" variant="outlined" />}
                     />
                   </FormControl>
                 </Col>
@@ -751,7 +972,7 @@ function PropertyDetails() {
           </Paper>
         )}
 
-        {activeStep === 2 && (
+        {/* {activeStep === 1 && (
           <Paper elevation={3} style={{ padding: "20px", margin: "20px 0" }}>
             <Typography variant="h5">Address Details</Typography>
             <Box mt={3}>
@@ -828,9 +1049,9 @@ function PropertyDetails() {
               </Row>
             </Box>
           </Paper>
-        )}
+        )} */}
 
-        {activeStep === 3 && (
+        {activeStep === 1 && (
           <Paper elevation={3} style={{ padding: "20px", margin: "20px 0" }}>
             <Typography variant="h5">Floor Information</Typography>
             <Box mt={3}>
@@ -869,7 +1090,7 @@ function PropertyDetails() {
                     <Col md={6}>
                       <FormControl fullWidth className="mt-3">
                         <TextField
-                          label="Area"
+                          label="Area Calculation"
                           name="area"
                           variant="outlined"
                           // value={floor.area}
@@ -922,7 +1143,7 @@ function PropertyDetails() {
                           value={floor.occupancy}
                           onChange={(e) => handleFloorChange(floor.id, e)}
                         /> */}
-                        <InputLabel>Occupancy</InputLabel>
+                        <InputLabel>Construction Type </InputLabel>
                         <Select
                           label="Occupancy"
                           name="occupancy"
@@ -943,7 +1164,7 @@ function PropertyDetails() {
                     <Col md={6}>
                       <FormControl fullWidth className="mt-3">
                         <TextField
-                          label="Flat No"
+                          label="Percentage Used"
                           name="flatNo"
                           variant="outlined"
                           value={floor.flatNo}
@@ -951,17 +1172,16 @@ function PropertyDetails() {
                         />
                       </FormControl>
                     </Col>
-                    <Col md={6}>
-                      {/* Conditionally render based on selected usage */}
+                    {/* <Col md={6}>
                       {floor.usage === "Residential" ? null : (
                         <FormControl fullWidth className="mt-3">
-                          {/* <TextField
+                          <TextField
                             label="Establishment"
                             name="establishment"
                             variant="outlined"
                             value={floor.establishment}
                             onChange={(e) => handleFloorChange(floor.id, e)}
-                          /> */}
+                          />
                           <InputLabel>Establishment</InputLabel>
                           <Select
                             label="Establishment"
@@ -979,11 +1199,10 @@ function PropertyDetails() {
                           </Select>
                         </FormControl>
                       )}
-                    </Col>
+                    </Col> */}
                   </Row>
                   <Row className="mt-3">
-                    <Col md={6}>
-                      {/* Conditionally render based on selected usage */}
+                    {/* <Col md={6}>
                       {floor.usage === "Residential" ? null : (
                         <FormControl fullWidth className="mt-3">
                           <TextField
@@ -995,7 +1214,7 @@ function PropertyDetails() {
                           />
                         </FormControl>
                       )}
-                    </Col>
+                    </Col> */}
                     <Col md={6}>
                       <IconButton
                         color="secondary"
@@ -1020,7 +1239,7 @@ function PropertyDetails() {
             </Box>
           </Paper>
         )}
-        {activeStep === 4 && (
+        {activeStep === 2 && (
           <Paper elevation={3} style={{ padding: "20px", margin: "20px 0" }}>
             <Typography variant="h5">Facility Details</Typography>
             <Box mt={3}>

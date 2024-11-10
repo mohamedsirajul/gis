@@ -222,6 +222,8 @@ const AssignTask = () => {
       ...additionalSelections.flatMap((selection) => selection.StreetName),
     ];
 
+    console.log(filteredProperties);
+    
     const postData = {
       user_id,
       properties: filteredProperties,

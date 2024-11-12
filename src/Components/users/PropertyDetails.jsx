@@ -135,6 +135,8 @@ function PropertyDetails() {
   const [selectedAreaofplot, setselectedAreaofplot] = useState("");
   const [selectedMobile, setSelectedMobile] = useState("");
   const [selectedZone, setSelectedZone] = useState("");
+  const [proptype, setpropType] = useState(false);
+  const [calculatedValue, setcalculatedValue] = useState(false);
 
   const [assmtNo, setassmtNo] = useState("");
   const [OldassmtNo, setOldassmtNo] = useState("");
@@ -201,6 +203,7 @@ function PropertyDetails() {
     setActiveStep(0);
   };
 
+  
   const addFloorInformation = () => {
     const newId = floorInformation.length + 1;
     setFloorInformation([
@@ -282,6 +285,8 @@ function PropertyDetails() {
     }
   }, [selectedBillNo]);
 
+
+
   const user_id = localStorage.getItem("user_id");
   // console.log(user_id);
   useEffect(() => {
@@ -335,16 +340,21 @@ function PropertyDetails() {
   }, [selectedWard, data]);
 
   useEffect(() => {
-    if (selectedStreet) {
-      const assessments = data
-        .filter((item) => item.StreetName === selectedStreet)
-        .map((item) => item.AssesmentNo);
-      setAssessmentOptions(assessments);
-    } else {
+    // if (selectedStreet) {
+    //   const assessments = data
+    //     .filter((item) => item.StreetName === selectedStreet)
+    //     .map((item) => item.AssesmentNo);
+    //   setAssessmentOptions(assessments);
+    // } else {
+
+
       // Show all AssesmentNo if no street is selected
       const allAssessments = data.map((item) => item.AssesmentNo);
+
+      console.log(allAssessments);
+      
       setAssessmentOptions(allAssessments);
-    }
+    // }
   }, [selectedStreet, data]);
 
   // useEffect(() => {
@@ -517,6 +527,12 @@ function PropertyDetails() {
     // window.href = "/user_login";
   };
 
+  const gotomap = async () => {
+
+    window.location.href = "https://terralensinnovations.com/cbe/";
+
+  };
+
    // Function to handle the open dialog action
    const handleOpenDialog = () => {
     setOpenDialog(true);
@@ -576,11 +592,42 @@ function PropertyDetails() {
     }
   };
 
+  useEffect(() => {
+    if (selectedOwner) {
+      const relatedData = data.filter((item) => item.Owner_name === selectedOwner);
+      // const streets = [...new Set(relatedData.map((item) => item))];
+      const streets = [...new Set(relatedData.map((item) => item.StreetName))];
+      const assessments = [...new Set(relatedData.map((item) => item.AssesmentNo))];
+
+      setStreetOptions(streets);
+      setAssessmentOptions(assessments);
+
+      // If only one bill and street for the owner, auto-select
+      if (streets.length === 1) setSelectedStreet(streets[0]);
+      if (assessments.length === 1) setSelectedBillNo(assessments[0]);
+    }
+  }, [selectedOwner, data]);
+
+  const handleRadioChange = (event) => {
+    if (event.target.value === "old") {
+      setpropType(false)
+    }
+    if (event.target.value === "new") {
+      setpropType(true)
+  }
+  };
+
   return (
     <div>
       <AppBar position="static">
         <Toolbar>
           <Typography variant="h6">PROPERTY INFORMATION</Typography>
+          <Button
+            style={{ color: "white"}}
+            onClick={gotomap}
+          >
+            MAP
+          </Button>
           <Button
             style={{ color: "white", marginLeft: "auto" }}
             onClick={onLogOut}
@@ -673,52 +720,54 @@ function PropertyDetails() {
                     />
                   </FormControl>
                 </Col>
-                <Col md={6} className="mt-3">
-                  <FormControl fullWidth>
-                    {/* <InputLabel>Ward</InputLabel>
-                    <Select
-                      label="Ward"
-                      variant="outlined"
-                      value={selectedWard}
-                      onChange={(e) => setSelectedWard(e.target.value)}
+                <Col md={6}>
+                  <FormControl component="fieldset">
+                    <RadioGroup
+                      row
+                      aria-label="hoarding"
+                      name="hoarding"
+                      value={selectedHoarding}
+                      onChange={(e) => setSelectedHoarding(e.target.value)}
                     >
-                      {wardOptions.map((ward) => (
-                        <MenuItem key={ward} value={ward}>
-                          {ward}
-                        </MenuItem>
-                      ))}
-                    </Select> */}
-                    <Autocomplete
-                        options={wardOptions}
-                        value={selectedWard}
-                        onChange={(e, newValue) => setSelectedWard(newValue)}
-                        renderInput={(params) => <TextField {...params} label="Ward No" variant="outlined" />}
+                      <FormControlLabel
+                        value="Split Building"
+                        control={<Radio />}
+                        label="Split Building"
                       />
+                      <FormControlLabel
+                        value="Merge Building"
+                        control={<Radio />}
+                        label="Merge Building"
+                      />
+                      <FormControlLabel 
+                        value="No Correction"
+                        control={<Radio />}
+                        label="No Correction"
+                      />
+                    </RadioGroup>
                   </FormControl>
                 </Col>
-                <Col md={6} className="mt-3">
-                  <FormControl fullWidth>
-                    {/* <InputLabel>Street Name</InputLabel>
-                    <Select
-                      label="Street Name"
-                      variant="outlined"
-                      value={selectedStreet}
-                      onChange={(e) => setSelectedStreet(e.target.value)}
-                      disabled={!selectedWard}
+                <Col md={6}>
+                  <FormControl fullWidth className="mt-3">
+                    {/* <InputLabel>Building Type</InputLabel> */}
+                    {/* <Select
+                      label="Building Type"
+                      value={selectedbuildingTypeOptions}
+                      onChange={(e) => setbuildingTypeOptions(e.target.value)}
                     >
-                      {streetOptions.map((street) => (
-                        <MenuItem key={street} value={street}>
-                          {street}
+                      {buildingTypeOptions.map((type) => (
+                        <MenuItem key={type} value={type}>
+                          {type}
                         </MenuItem>
                       ))}
                     </Select> */}
                     <Autocomplete
-                      options={streetOptions}
-                      value={selectedStreet}
-                      onChange={(e, newValue) => setSelectedStreet(newValue)}
-                      renderInput={(params) => <TextField {...params} label="Road Name" variant="outlined" />}
-                      disabled={!selectedWard}
+                      options={buildingTypeOptions}
+                      value={selectedbuildingTypeOptions}
+                      onChange={(e, newValue) => setbuildingTypeOptions(newValue)}
+                      renderInput={(params) => <TextField {...params} label="Property Type" variant="outlined" />}
                     />
+
                   </FormControl>
                 </Col>
                 <Col md={6}>
@@ -745,93 +794,7 @@ function PropertyDetails() {
                     />
                   </FormControl>
                 </Col>
-                <Col md={6}>
-                  <FormControl fullWidth className="mt-3">
-                    {/* <InputLabel>Building Type</InputLabel> */}
-                    {/* <Select
-                      label="Building Type"
-                      value={selectedbuildingTypeOptions}
-                      onChange={(e) => setbuildingTypeOptions(e.target.value)}
-                    >
-                      {buildingTypeOptions.map((type) => (
-                        <MenuItem key={type} value={type}>
-                          {type}
-                        </MenuItem>
-                      ))}
-                    </Select> */}
-                    <Autocomplete
-                      options={buildingTypeOptions}
-                      value={selectedbuildingTypeOptions}
-                      onChange={(e, newValue) => setbuildingTypeOptions(newValue)}
-                      renderInput={(params) => <TextField {...params} label="Property Type" variant="outlined" />}
-                    />
-
-                  </FormControl>
-                </Col>
-              </Row>
-              <Row className="mt-3">
-                <Col md={12}>
-                  <FormControl component="fieldset">
-                    <RadioGroup row aria-label="status" name="status">
-                      <FormControlLabel
-                        value="old"
-                        control={<Radio />}
-                        label="Old"
-                      />
-                      <FormControlLabel
-                        value="new"
-                        control={<Radio />}
-                        label="New"
-                      />
-                      {/* <FormControlLabel
-                        value="inactive"
-                        control={<Radio />}
-                        label="Inactive"
-                      />
-                      <FormControlLabel
-                        value="completed"
-                        control={<Radio />}
-                        label="Completed"
-                      /> */}
-                    </RadioGroup>
-                  </FormControl>
-                </Col>
-              </Row>
-              <Row className="mt-3">
-                <Col md={6}>
-                  <FormControl fullWidth className="mt-3">
-                    {/* <InputLabel>Bill Number</InputLabel> */}
-                    {/* <Select
-                      label="Bill Number"
-                      value={selectedBillNo}
-                      onChange={(e) => setSelectedBillNo(e.target.value)}
-                    >
-                      {assessmentOptions.map((bill) => (
-                        <MenuItem key={bill} value={bill}>
-                          {bill}
-                        </MenuItem>
-                      ))}
-                    </Select> */}
-                  <Autocomplete
-                    options={assessmentOptions}
-                    value={selectedBillNo}
-                    onChange={(e, newValue) => setSelectedBillNo(newValue)}
-                    renderInput={(params) => <TextField {...params} label="Bill Number" variant="outlined" />}
-                  />
-                  </FormControl>
-                </Col>
-                <Col md={6}>
-                  <FormControl fullWidth className="mt-3">
-                    <TextField
-                      label="Door Number"
-                      variant="outlined"
-                      value={selectedDoorNo}
-                      onChange={(e) => setSelectedDoorNo(e.target.value)}
-                      disabled
-                    />
-                  </FormControl>
-                </Col>
-        
+                
                 <Col md={6} className="mt-3">
                   <FormControl fullWidth>
                     <InputLabel>Construction Type</InputLabel>
@@ -849,27 +812,126 @@ function PropertyDetails() {
                         </MenuItem>
                       ))}
                     </Select>
-{/* 
+                  {/*   
+                  <TextField
+                    label="Building Used As"
+                    variant="outlined"
+                    value={usagename}
+                    onChange={(e) =>
+                      setSelectedBuildingUsedAs(e.target.value)
+                    }
+                    disabled
+                  /> */}
+                </FormControl>
+                </Col>
+              </Row>
+              <Row className="mt-3">
+                <Col md={12}>
+                    <FormControl component="fieldset">
+                      <RadioGroup
+                        row
+                        aria-label="status"
+                        name="status"
+                        onChange={handleRadioChange}
+                      >
+                        <FormControlLabel value="old" control={<Radio />} label="Old" />
+                        <FormControlLabel value="new" control={<Radio />} label="New" />
+                      </RadioGroup>
+                    </FormControl>
+                  </Col>
+              </Row>
+              <Row className="mt-3">
+              <Col md={6} className="mt-3">
+              {proptype ? (
+                <FormControl fullWidth className="mt-3">
+                  <TextField
+                    label="Ward Number"
+                    variant="outlined"
+                    value={selectedWard}
+                    onChange={(e, newValue) => setSelectedWard(newValue)}
+                  />
+                                        
+                </FormControl>
+              ) : (
+                <FormControl fullWidth className="mt-3">
+                  <Autocomplete
+                      options={wardOptions}
+                      value={selectedWard}
+                      onChange={(e, newValue) => setSelectedWard(newValue)}
+                      renderInput={(params) => <TextField {...params} label="Ward No" variant="outlined" />}
+                    />
+                </FormControl>
+              )}
+                </Col>
+                <Col md={6} className="mt-3">
+                {proptype ? (
+                <FormControl fullWidth className="mt-3">
+                  <TextField
+                    label="Road Name"
+                    variant="outlined"
+                    value={selectedStreet}
+                    onChange={(e, newValue) => setSelectedStreet(newValue)}
+                  />
+                                        
+                </FormControl>
+              ) : (
+                <FormControl fullWidth className="mt-3">
+                  <Autocomplete
+                      options={streetOptions}
+                      value={selectedStreet}
+                      onChange={(e, newValue) => setSelectedStreet(newValue)}
+                      renderInput={(params) => <TextField {...params} label="Road Name" variant="outlined" />}
+                      // disabled={!selectedWard}
+                    />
+                </FormControl>
+              )}
+                </Col>
+                <Col md={6}>
+                {proptype ? (
+                <FormControl fullWidth className="mt-3">
+                  <TextField
+                    label="Bill Number"
+                    variant="outlined"
+                    value={selectedBillNo}
+                    onChange={(e, newValue) => setSelectedBillNo(newValue)}
+                  />
+                                        
+                </FormControl>
+              ) : (
+                <FormControl fullWidth className="mt-3">
+                  <Autocomplete
+                    options={assessmentOptions}
+                    value={selectedBillNo}
+                    onChange={(e, newValue) => setSelectedBillNo(newValue)}
+                    renderInput={(params) => <TextField {...params} label="Bill Number" variant="outlined" />}
+                  />
+                </FormControl>
+              )}
+                </Col>
+                <Col md={6}>
+                  <FormControl fullWidth className="mt-3">
                     <TextField
-                      label="Building Used As"
+                      label="Door Number"
                       variant="outlined"
-                      value={usagename}
-                      onChange={(e) =>
-                        setSelectedBuildingUsedAs(e.target.value)
-                      }
-                      disabled
-                    /> */}
+                      value={selectedDoorNo}
+                      onChange={(e) => setSelectedDoorNo(e.target.value)}
+                      // disabled
+                    />
                   </FormControl>
                 </Col>
+        
+          
                 
                 <Col md={6} className="mt-3">
                   {/* Edit Details Button */}
-                  <Button variant="outlined" color="primary"  onClick={handleOpenDialog} 
-                  disabled={!selectedBillNo} >
-                  
-
-                    Edit Details
-                  </Button>
+                  {proptype ? (
+                    <></>
+              ) : (
+                <Button variant="outlined" color="primary"  onClick={handleOpenDialog} 
+                disabled={!selectedBillNo} >
+                  Edit Details
+                </Button>
+              )}
 
                   {/* Dialog for Editing Ward and Street */}
                   <Dialog open={openDialog} onClose={handleCloseDialog}>
@@ -905,7 +967,18 @@ function PropertyDetails() {
               </Row>
               <Row className="mt-3">
                 <Col md={6}>
-                  <FormControl fullWidth className="mt-3">
+                {proptype ? (
+                <FormControl fullWidth className="mt-3">
+                  <TextField
+                    label="Name of Assessee"
+                    variant="outlined"
+                    value={selectedOwner}
+                    onChange={(e, newValue) => setSelectedOwner(newValue)}
+                  />
+                                        
+                </FormControl>
+              ) : (
+                <FormControl fullWidth className="mt-3">
                     {/* <TextField
                       label="Name of Assessee"
                       variant="outlined"
@@ -920,6 +993,7 @@ function PropertyDetails() {
                       renderInput={(params) => <TextField {...params} label="Name of Assessee" variant="outlined" />}
                     />
                   </FormControl>
+              )}
                 </Col>
 
                 <Col md={6} className="mt-3">
@@ -1151,7 +1225,7 @@ function PropertyDetails() {
                           value={floor.occupancy}
                           onChange={(e) => handleFloorChange(floor.id, e)}
                         >
-                          {FloorOccupancy.map((option) => (
+                          {buildingUsedAsOptions.map((option) => (
                             <MenuItem key={option} value={option}>
                               {option}
                             </MenuItem>
@@ -1168,8 +1242,15 @@ function PropertyDetails() {
                           name="flatNo"
                           variant="outlined"
                           value={floor.flatNo}
-                          onChange={(e) => handleFloorChange(floor.id, e)}
+                          // onChange={(e) => handleFloorChange(floor.id, e)}
+                          onChange={(e) => {
+                            handleFloorChange(floor.id, e)
+                            const percentage = e.target.value; // The percentage input by the user
+                            const calculated = (selectedAreaofplot * percentage) / 100; // Calculate the percentage of selectedAreaofplot
+                            setcalculatedValue(calculated)
+                          }}
                         />
+                        <p>{calculatedValue}%</p>
                       </FormControl>
                     </Col>
                     {/* <Col md={6}>
@@ -1241,9 +1322,9 @@ function PropertyDetails() {
         )}
         {activeStep === 2 && (
           <Paper elevation={3} style={{ padding: "20px", margin: "20px 0" }}>
-            <Typography variant="h5">Facility Details</Typography>
+            <Typography variant="h5">Upload Image</Typography>
             <Box mt={3}>
-              <Row>
+              {/* <Row>
                 <Col md={6}>
                   <FormControl component="fieldset">
                     <RadioGroup
@@ -1340,7 +1421,7 @@ function PropertyDetails() {
                     />
                   </FormControl>
                 </Col>
-              </Row>
+              </Row> */}
               <Row className="mt-3">
                 <Col md={12}>
                   <FormControl fullWidth>

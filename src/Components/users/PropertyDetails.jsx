@@ -136,7 +136,7 @@ function PropertyDetails() {
   const [selectedMobile, setSelectedMobile] = useState("");
   const [selectedZone, setSelectedZone] = useState("");
   const [proptype, setpropType] = useState(false);
-  const [calculatedValue, setcalculatedValue] = useState(false);
+  const [calculatedValues, setCalculatedValues] = useState({});
 
   const [assmtNo, setassmtNo] = useState("");
   const [OldassmtNo, setOldassmtNo] = useState("");
@@ -191,8 +191,22 @@ function PropertyDetails() {
     "Facility Details",
   ];
 
-  const handleNext = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
+  // Add a new state for next button loading
+  const [nextLoading, setNextLoading] = useState(false);
+
+  // Update the handleNext function
+  const handleNext = async () => {
+    setNextLoading(true);
+    try {
+      if (isStepValid()) {
+        setActiveStep((prevActiveStep) => prevActiveStep + 1);
+        setSuccessMessage("");
+        setErrorMessage("");
+        setOpenSnackbar(false);
+      }
+    } finally {
+      setNextLoading(false);
+    }
   };
 
   const handleBack = () => {
@@ -222,11 +236,24 @@ function PropertyDetails() {
   };
 
   const handleFloorChange = (id, event) => {
-    const updatedFloorInfo = floorInformation.map((item) =>
-      item.id === id
-        ? { ...item, [event.target.name]: event.target.value }
-        : item
-    );
+    const { name, value } = event.target;
+    const updatedFloorInfo = floorInformation.map((item) => {
+      if (item.id === id) {
+        // Get base area based on floor number
+        const baseArea = item.floor === 0 ? selectedAreaofplot : item.area;
+        
+        // Calculate area if percentage is being changed
+        let updates = { [name]: value };
+        if (name === 'flatNo') { // percentage field
+          const percentage = parseFloat(value) || 0;
+          const calculatedArea = (baseArea * percentage) / 100;
+          updates.calculatedArea = calculatedArea.toFixed(2);
+        }
+        
+        return { ...item, ...updates };
+      }
+      return item;
+    });
     setFloorInformation(updatedFloorInfo);
   };
 
@@ -369,51 +396,115 @@ function PropertyDetails() {
 
   const isStepValid = () => {
     switch (activeStep) {
-      case 0:
-        return selectedStreet !== "" && selectedWard !== "";
-      // case 1:
-      //   return (
-      //     selectedBillNo !== "" &&
-      //     selectedBuildingUsedAs !== "" &&
-      //     selectedPROPERTY_OWNERSHIP !== "" &&
-      //     Gisid !== "" &&
-      //     selectedbuildingTypeOptions !== "" &&
-      //     selectedDoorNo !== "" &&
-      //     selectedOwner !== "" &&
-      //     selectedAreaofplot !== "" &&
-      //     selectedMobile !== "" &&
-      //     BuildingName !== "" &&
-      //     TotalFloor !== ""
-      //   );
-      // case 2:
-      //   return (
-      //     address1 !== "" &&
-      //     address2 !== "" &&
-      //     area !== "" &&
-      //     location !== "" &&
-      //     city !== "" &&
-      //     state !== "" &&
-      //     pinCode !== ""
-      //   );
-      // case 3:
-      //   return floorInformation.every(
-      //     (floor) =>
-      //       floor.floor !== "" &&
-      //       floor.area !== "" &&
-      //       floor.usage !== "" &&
-      //       floor.occupancy !== "" &&
-      //       floor.flatNo !== "" &&
-      //       floor.establishment !== "" &&
-      //       floor.establishmentName !== ""
-      //   );
-      case 1:
+      case 0: // Property Info
+        // Basic validation
+        if (!Gisid.trim()) {
+          message.error("GIS ID is required");
+          return false;
+        }
+        if (!selectedbuildingTypeOptions) {
+          message.error("Property Type is required");
+          return false;
+        }
+        if (!selectedPROPERTY_OWNERSHIP) {
+          message.error("Property Usage is required");
+          return false;
+        }
+        if (!selectedBuildingUsedAs) {
+          message.error("Construction Type is required");
+          return false;
+        }
+        if (!selectedWard) {
+          message.error("Ward Number is required");
+          return false;
+        }
+        if (!selectedStreet) {
+          message.error("Road Name is required");
+          return false;
+        }
+        if (!selectedBillNo) {
+          message.error("Bill Number is required");
+          return false;
+        }
+        if (!selectedDoorNo) {
+          message.error("Door Number is required");
+          return false;
+        }
+        if (!selectedOwner) {
+          message.error("Name of Assessee is required");
+          return false;
+        }
+        // if (!BuildingName.trim()) {
+        //   message.error("Building Name is required");
+        //   return false;
+        // }
+        // if (!TotalFloor) {
+        //   message.error("Total Floor is required");
+        //   return false;
+        // }
+        if (!selectedAreaofplot) {
+          message.error("Area of Plot is required");
+          return false;
+        }
+        // if (!selectedMobile || !/^\d{10}$/.test(selectedMobile)) {
+        //   message.error("Please enter a valid 10-digit mobile number");
+        //   return false;
+        // }
         return true;
-      case 2:
+
+      case 1: // Floor Info
+        // Validate each floor's information
+        for (let i = 0; i < floorInformation.length; i++) {
+          const floor = floorInformation[i];
+          
+          if (!floor.floor && floor.floor !== 0) {
+            message.error(`Floor number is required for Floor ${i + 1}`);
+            return false;
+          }
+          
+          if (!floor.area && i !== 0) { // Skip area validation for ground floor
+            message.error(`Area is required for Floor ${i + 1}`);
+            return false;
+          }
+          
+          if (!floor.usage) {
+            message.error(`Usage is required for Floor ${i + 1}`);
+            return false;
+          }
+          
+          if (!floor.occupancy) {
+            message.error(`Construction Type is required for Floor ${i + 1}`);
+            return false;
+          }
+          
+          if (!floor.flatNo || isNaN(floor.flatNo) || floor.flatNo < 0 || floor.flatNo > 100) {
+            message.error(`Please enter a valid percentage (0-100) for Floor ${i + 1}`);
+            return false;
+          }
+        }
         return true;
-      case 3:
+
+      case 2: // Facility Details (Upload Image)
+        if (!selectedFile) {
+          message.error("Please upload an image");
+          return false;
+        }
+        
+        // Validate file type
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+        if (!allowedTypes.includes(selectedFile.type)) {
+          message.error("Please upload a valid image file (JPEG, PNG, or JPG)");
+          return false;
+        }
+        
+        // Validate file size (e.g., max 5MB)
+        const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+        if (selectedFile.size > maxSize) {
+          message.error("File size should be less than 5MB");
+          return false;
+        }
         return true;
-      case 4:
-        return true; // No validation needed for Facility Details
+
       default:
         return false;
     }
@@ -422,98 +513,186 @@ function PropertyDetails() {
   //click submit
 
   const handleSubmit = async () => {
-    setLoading(true); // Set loading to true when the form submission starts
+    setLoading(true);
 
-    const formData = new FormData();
-    let AssessmentNo = assmtNo;
-    let oldAssessmentNo = OldassmtNo;
-
-    let zone = selectedZone;
-    // console.log(selectedBuildingUsedAs);
-    // console.log(AssessmentNo);
-    // console.log(oldAssessmentNo);
-    let user_id = localStorage.getItem("user_id");
-    const jsonData = {
-      user_id,
-      BuildingName,
-      Gisid,
-      AssessmentNo,
-      oldAssessmentNo,
-      TotalFloor,
-      address1,
-      address2,
-      area,
-      city,
-      floorInformation,
-      headRooms,
-      liftRooms,
-      location,
-      oht,
-      parking,
-      pinCode,
-      ramp,
-      selectedAreaofplot,
-      selectedBuildingUsedAs,
-      selectedDoorNo,
-      selectedHoarding,
-      selectedMobile,
-      selectedMobileTower,
-      selectedOwner,
-      selectedPROPERTY_OWNERSHIP,
-      selectedStreet,
-      selectedWard,
-      selectedbuildingTypeOptions,
-      state,
-      zone,
-    };
-
-    formData.append("jsonData", JSON.stringify(jsonData));
-    formData.append("selectedFile", selectedFile);
-
-    // try {
-    //   const response = await fetch(
-    //     "https://luisnellai.xyz/siraj/postbuildingdata.php",
-    //     {
-    //       method: "POST",
-    //       body: formData,
-    //     }
-    //   );
-
-    //   const result = await response.json();
-    //   console.log("Response:", result);
-    // } catch (error) {
-    //   console.error("Error:", error);
-    // }
     try {
+      // Format floor information with calculated values
+      const formattedFloorInfo = floorInformation.map((floor, index) => {
+        const baseArea = index === 0 ? selectedAreaofplot : floor.area;
+        const percentage = parseFloat(floor.flatNo) || 0;
+        const calculatedArea = (baseArea * percentage) / 100;
+
+        return {
+          floor_no: floor.floor || "",
+          floor_area: baseArea || "0",
+          floor_usage: floor.usage || "",
+          construction_type: floor.occupancy || "",
+          percentage_used: floor.flatNo || "0",
+          calculated_area: calculatedArea.toString()
+        };
+      });
+
+      // Main payload structure
+      const payload = {
+        user_id: localStorage.getItem("user_id"),
+        property_details: {
+          gis_id: Gisid || "",
+          assessment_no: assmtNo || "",
+          old_assessment_no: OldassmtNo || "",
+          ward_no: selectedWard || "",
+          road_name: selectedStreet || "",
+          door_no: selectedDoorNo || "",
+          building_name: BuildingName || "",
+          zone: selectedZone || "",
+          property_type: selectedbuildingTypeOptions || "",
+          property_usage: selectedPROPERTY_OWNERSHIP || "",
+          construction_type: selectedBuildingUsedAs || "",
+          total_floors: TotalFloor || "0",
+          plot_area: selectedAreaofplot || "0",
+          mobile_no: selectedMobile || "",
+          owner_name: selectedOwner || "",
+          split_status: selectedHoarding || "No Correction",
+          is_new_property: proptype
+        },
+        floor_details: formattedFloorInfo,
+        address_details: {
+          address1: address1 || "",
+          address2: address2 || "",
+          area: area || "",
+          location: location || "",
+          city: city || "",
+          state: state || "",
+          pincode: pinCode || ""
+        },
+        facility_details: {
+          head_rooms: headRooms || "",
+          lift_rooms: liftRooms || "",
+          parking: parking || "",
+          ramp: ramp || "",
+          oht: oht || "",
+          mobile_tower: selectedMobileTower || "no"
+        }
+      };
+
+      console.log(payload);
+    
+      // Create FormData and append the payload
+      const formData = new FormData();
+      formData.append("jsonData", JSON.stringify(payload));
+      
+      // Append file if selected
+      if (selectedFile) {
+        formData.append("selectedFile", selectedFile);
+      }
+
+      // Log the payload for debugging
+      console.log("Sending payload:", payload);
+
+      // Make the API call
       const response = await fetch(
         "https://luisnellai.xyz/siraj/postbuildingdata.php",
         {
           method: "POST",
-          body: formData,
+          body: formData
         }
       );
 
-      const result = await response.json();
-      console.log("Response:", result);
-
-      if (response.ok) {
-        setSuccessMessage("Building data submitted successfully!");
-        setErrorMessage(""); // Clear any previous error message
-        // setTimeout(() => {
-        //   window.location.reload();
-        // }, 2000);
-      } else {
-        setErrorMessage("Failed to submit building data. Please try again.");
-        setSuccessMessage(""); // Clear any previous success message
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
+
+      const result = await response.json();
+      console.log("API Response:", result);
+
+      // Only show success message after final submit
+      if (result.success) {
+        setSuccessMessage("Building data submitted successfully!");
+        setErrorMessage("");
+        setOpenSnackbar(true);  // Only open snackbar after final submit
+        
+        // Log preserved values before reset
+        console.log("Preserved values:", {
+          gisId: Gisid,
+          splitMergeStatus: selectedHoarding,
+          propertyType: selectedbuildingTypeOptions,
+          propertyUsage: selectedPROPERTY_OWNERSHIP,
+          constructionType: selectedBuildingUsedAs
+        });
+
+        setTimeout(() => {
+          resetForm();
+          setActiveStep(0);
+        }, 2000);
+      }
+
     } catch (error) {
-      console.error("Error:", error);
-      setErrorMessage("An error occurred while submitting building data.");
-      setSuccessMessage(""); // Clear any previous success message
+      console.error("Submission Error:", error);
+      setErrorMessage("Failed to submit building data: " + error.message);
+      setSuccessMessage("");
+      setOpenSnackbar(true);  // Only open snackbar after final submit
     } finally {
-      setLoading(false); // Set loading to false when the form submission ends
-      setOpenSnackbar(true); // Open the snackbar to display message
+      setLoading(false);
     }
+  };
+
+  // Update the resetForm function
+  const resetForm = () => {
+    // Do not reset these fields
+    // const gisIdValue = Gisid;
+    // const selectedHoardingValue = selectedHoarding;
+    // const buildingTypeValue = selectedbuildingTypeOptions;
+    // const propertyUsageValue = selectedPROPERTY_OWNERSHIP;
+    // const constructionTypeValue = selectedBuildingUsedAs;
+
+    // Reset all other fields
+    // setGisId(""); // Remove this line to keep GIS ID
+    // setSelectedHoarding(""); // Remove this line to keep Split/Merge/No Correction
+    // setbuildingTypeOptions(""); // Remove this line to keep Property Type
+    // setselectedPROPERTY_OWNERSHIP(""); // Remove this line to keep Property Usage
+    // setSelectedBuildingUsedAs(""); // Remove this line to keep Construction Type
+    
+    // Reset remaining fields
+    setSelectedBillNo("");
+    setSelectedDoorNo("");
+    setSelectedOwner("");
+    setselectedAreaofplot("");
+    setSelectedMobile("");
+    setBuildingName("");
+    setTotalFloor("");
+    setSelectedMobileTower("");
+    setSelectedWard("");
+    setSelectedStreet("");
+    setSelectedZone("");
+    setassmtNo("");
+    setOldassmtNo("");
+    setusagename("");
+    setAdress1("");
+    setAdress2("");
+    setArea("");
+    setLocationn("");
+    setCity("");
+    setState("");
+    setPinCode("");
+    setHeadRooms("");
+    setLiftRooms("");
+    setParking("");
+    setRamp("");
+    setOht("");
+    setFloorInformation([
+      {
+        id: 1,
+        floor: "",
+        area: "",
+        usage: "",
+        occupancy: "",
+        flatNo: "",
+        establishment: "",
+        establishmentName: "",
+      },
+    ]);
+    setCalculatedValues({});
+    setSelectedFile(null);
+    setpropType(false);
   };
 
   const handleCloseSnackbar = () => {
@@ -527,10 +706,10 @@ function PropertyDetails() {
     // window.href = "/user_login";
   };
 
-  const gotomap = async () => {
-
-    window.location.href = "https://terralensinnovations.com/cbe/";
-
+  const gotomap = () => {
+    const mapUrl = "https://terralensinnovations.com/cbe/";
+    const windowFeatures = "width=1000,height=800,left=200,top=100";
+    window.open(mapUrl, "MapWindow", windowFeatures);
   };
 
    // Function to handle the open dialog action
@@ -1167,9 +1346,9 @@ function PropertyDetails() {
                           label="Area Calculation"
                           name="area"
                           variant="outlined"
-                          // value={floor.area}
-                          value={selectedAreaofplot}
+                          value={index === 0 ? selectedAreaofplot : floor.area} // Use selectedAreaofplot for first floor only
                           onChange={(e) => handleFloorChange(floor.id, e)}
+                          disabled={index === 0} 
                         />
                       </FormControl>
                     </Col>
@@ -1242,15 +1421,18 @@ function PropertyDetails() {
                           name="flatNo"
                           variant="outlined"
                           value={floor.flatNo}
-                          // onChange={(e) => handleFloorChange(floor.id, e)}
                           onChange={(e) => {
-                            handleFloorChange(floor.id, e)
-                            const percentage = e.target.value; // The percentage input by the user
-                            const calculated = (selectedAreaofplot * percentage) / 100; // Calculate the percentage of selectedAreaofplot
-                            setcalculatedValue(calculated)
+                            handleFloorChange(floor.id, e);
+                            const percentage = e.target.value;
+                            const baseArea = index === 0 ? selectedAreaofplot : floor.area; // Use floor's area for non-first floors
+                            const calculated = (baseArea * percentage) / 100;
+                            setCalculatedValues(prev => ({
+                              ...prev,
+                              [floor.id]: calculated
+                            }));
                           }}
                         />
-                        <p>{calculatedValue}%</p>
+                        <p>{calculatedValues[floor.id] ? `${calculatedValues[floor.id]} Sqft` : ''}</p>
                       </FormControl>
                     </Col>
                     {/* <Col md={6}>
@@ -1496,7 +1678,8 @@ function PropertyDetails() {
                   variant="contained"
                   color="primary"
                   onClick={handleNext}
-                  disabled={!isStepValid()}
+                  disabled={nextLoading}
+                  startIcon={nextLoading && <CircularProgress size={20} color="inherit" />}
                 >
                   Next
                 </Button>

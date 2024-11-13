@@ -385,7 +385,7 @@ const Fad = () => {
                     >
                       Roof Area (Drone Survey in Sq.ft)
                     </TableCell>
-
+{/* 
                     <TableCell
                       style={{
                         fontWeight: "bold",
@@ -395,7 +395,7 @@ const Fad = () => {
                       }}
                     >
                       Add Tax
-                    </TableCell>
+                    </TableCell> */}
                     <TableCell
                       style={{
                         fontWeight: "bold",
@@ -494,7 +494,7 @@ const Fad = () => {
                             <Visibility />
                           </IconButton>
                         </TableCell> */}
-                          <TableCell
+                          {/* <TableCell
                             style={{
                               border: "2px solid black",
                               textAlign: "center",
@@ -516,7 +516,7 @@ const Fad = () => {
                             >
                               Add Tax
                             </Button>
-                          </TableCell>
+                          </TableCell> */}
                           {detailIndex === 0 &&
                             !renderedAssessmentNos.has(
                               detail.properties.AssessmentNo

@@ -117,6 +117,7 @@ const renderRoutes = () => {
           element={<Navigate replace to="/prop_details" />}
         />
         <Route path="/prop_details" element={<PropertyDetails />} />
+        <Route path="/Gis_finder/index.html" element={<Navigate to="/Gis_finder/index.html" />} />
         <Route path="*" element={<Navigate to="/prop_details" replace />} />
       </Routes>
     );

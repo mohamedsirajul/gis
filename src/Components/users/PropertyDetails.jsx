@@ -194,6 +194,8 @@ function PropertyDetails() {
   // Add a new state for next button loading
   const [nextLoading, setNextLoading] = useState(false);
 
+  const [gisIdSource, setGisIdSource] = useState('manual'); // 'manual' or 'map'
+
   // Update the handleNext function
   const handleNext = async () => {
     setNextLoading(true);
@@ -606,22 +608,21 @@ function PropertyDetails() {
 
       // Only show success message after final submit
       if (result.success) {
+        // Update the submitted GIS IDs
+        window.updateSubmittedGisId?.(Gisid);
+        
         setSuccessMessage("Building data submitted successfully!");
         setErrorMessage("");
-        setOpenSnackbar(true);  // Only open snackbar after final submit
+        setOpenSnackbar(true);
         
-        // Log preserved values before reset
-        console.log("Preserved values:", {
-          gisId: Gisid,
-          splitMergeStatus: selectedHoarding,
-          propertyType: selectedbuildingTypeOptions,
-          propertyUsage: selectedPROPERTY_OWNERSHIP,
-          constructionType: selectedBuildingUsedAs
-        });
-
+        // Store in localStorage for persistence
+        const submittedGisIds = JSON.parse(localStorage.getItem('submittedGisIds') || '[]');
+        submittedGisIds.push(Gisid);
+        localStorage.setItem('submittedGisIds', JSON.stringify(submittedGisIds));
+        
         setTimeout(() => {
-          resetForm();
-          setActiveStep(0);
+            resetForm();
+            setActiveStep(0);
         }, 2000);
       }
 
@@ -707,9 +708,18 @@ function PropertyDetails() {
   };
 
   const gotomap = () => {
-    const mapUrl = "https://terralensinnovations.com/cbe/";
-    const windowFeatures = "width=1000,height=800,left=200,top=100";
-    window.open(mapUrl, "MapWindow", windowFeatures);
+    // Get the current directory path
+    const currentPath = window.location.pathname;
+    const basePath = window.location.origin;
+    
+    // Construct the path to the Gis_finder/index.html file
+    const mapUrl = `${basePath}/Gis_finder/index.html`;
+    
+    // Window features for the popup
+    const windowFeatures = "width=1000,height=800,left=200,top=100,resizable=yes,scrollbars=yes";
+    
+    // Open in a new window/tab
+    window.open(mapUrl, "GISFinder", windowFeatures);
   };
 
    // Function to handle the open dialog action
@@ -794,6 +804,38 @@ function PropertyDetails() {
     if (event.target.value === "new") {
       setpropType(true)
   }
+  };
+
+  // To retrieve the GISID
+  const storedGISID = localStorage.getItem('selectedGISID');
+
+  useEffect(() => {
+    const handleMessage = (event) => {
+      if (event.data.type === 'GISID_SELECTED') {
+        const selectedGISID = event.data.gisId;
+        console.log('Selected GISID:', selectedGISID);
+        setGisId(selectedGISID);
+        setGisIdSource('map');
+        message.success('GIS ID selected from map!');
+      }
+    };
+
+    const storedGISID = localStorage.getItem('selectedGISID');
+    if (storedGISID) {
+      setGisId(storedGISID);
+      setGisIdSource('map');
+      localStorage.removeItem('selectedGISID');
+      message.success('GIS ID loaded from previous selection!');
+    }
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
+
+  // Function to handle manual GIS ID changes
+  const handleGisIdChange = (e) => {
+    setGisId(e.target.value);
+    setGisIdSource('manual');
   };
 
   return (
@@ -894,8 +936,16 @@ function PropertyDetails() {
                   <FormControl fullWidth>
                     <TextField
                       label="GIS ID"
-                      onChange={(e) => setGisId(e.target.value)}
+                      value={Gisid}
+                      onChange={handleGisIdChange}
                       variant="outlined"
+                      InputProps={{
+                        endAdornment: gisIdSource === 'map' ? (
+                          <span style={{ color: 'green', fontSize: '0.8rem' }}>
+                            ✓ From Map
+                          </span>
+                        ) : null,
+                      }}
                     />
                   </FormControl>
                 </Col>

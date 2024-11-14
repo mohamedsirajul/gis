@@ -64,73 +64,66 @@ import { Margin } from "@mui/icons-material";
 
     const generateAllCSVData = (data, columns, nestedKey = null) => {
         let result = [];
-        // console.log(data);
-
         data.forEach(item => {
           if (nestedKey && item[nestedKey]) {
-            // // Handle nested data
-            // item[nestedKey].forEach(nestedItem => {
-            // //   console.log( item.AssessmentNo );
-            //   const row = { 'Assessment No': item.AssessmentNo }; // Add AssessmentNo to each row
-            //   columns.forEach(column => {
-            //     row[column.label] = item[column.key];
-            //     row[column.label] = nestedItem[column.key];
-            //   });
-            //   result.push(row);
-            // });
             item[nestedKey].forEach(nestedItem => {
-                const row = { 'Assessment No': item.AssessmentNo }; // Add AssessmentNo to each row
-            
-                columns.forEach(column => {
-                  // Check if the column key exists in the top-level item
-                  if (item.hasOwnProperty(column.key)) {
-                    row[column.label] = item[column.key];
-                  }
-                  
-                  // Check if the column key exists in the nested item
-                  if (nestedItem.hasOwnProperty(column.key)) {
+              const row = { 'Assessment No': item.AssessmentNo }; 
+              columns.forEach(column => {
+                // Check if the column key exists in the top-level item
+                if (item.hasOwnProperty(column.key)) {
+                  row[column.label] = item[column.key];
+                }
+                
+                // Check if the column key exists in the nested item
+                if (nestedItem.hasOwnProperty(column.key)) {
+                  // Special handling for occupancy field to use "Construction Type" label
+                  if (column.key === 'occupancy') {
+                    row['Construction Type'] = nestedItem[column.key];
+                  } else {
                     row[column.label] = nestedItem[column.key];
                   }
-                });
-            
-                result.push(row);
-              });
-          } else {
-            // Handle non-nested data
-            const row = { 'Assessment No': item.AssessmentNo }; // Add AssessmentNo to each row
-            columns.forEach(column => {
-              row[column.label] = item[column.key];
-            });
-            result.push(row);
-          }
-        });
-      
-        return result;
-      };
-    const generateCSVData = (data, columns, nestedKey = null) => {
-        let result = [];
-        data.forEach(item => {
-          if (nestedKey && item[nestedKey]) {
-            // Handle nested data
-            item[nestedKey].forEach(nestedItem => {
-              const row = { 'Assessment No': item.AssessmentNo }; // Add AssessmentNo to each row
-              columns.forEach(column => {
-                row[column.label] = nestedItem[column.key];
+                }
               });
               result.push(row);
             });
           } else {
             // Handle non-nested data
-            const row = { 'Assessment No': item.AssessmentNo }; // Add AssessmentNo to each row
+            const row = { 'Assessment No': item.AssessmentNo };
             columns.forEach(column => {
               row[column.label] = item[column.key];
             });
             result.push(row);
           }
         });
-      
         return result;
-      };
+    };
+
+    const generateCSVData = (data, columns, nestedKey = null) => {
+        let result = [];
+        data.forEach(item => {
+          if (nestedKey && item[nestedKey]) {
+            item[nestedKey].forEach(nestedItem => {
+              const row = { 'Assessment No': item.AssessmentNo };
+              columns.forEach(column => {
+                // Special handling for occupancy field to use "Construction Type" label
+                if (column.key === 'occupancy') {
+                  row['Construction Type'] = nestedItem[column.key];
+                } else {
+                  row[column.label] = nestedItem[column.key];
+                }
+              });
+              result.push(row);
+            });
+          } else {
+            const row = { 'Assessment No': item.AssessmentNo };
+            columns.forEach(column => {
+              row[column.label] = item[column.key];
+            });
+            result.push(row);
+          }
+        });
+        return result;
+    };
 
 
     const AllpropertyColumns = [
@@ -221,7 +214,7 @@ import { Margin } from "@mui/icons-material";
     { label: "Establishment Name", key: "establishmentName" },
     { label: "Flat No", key: "flatNo" },
     { label: "Floor", key: "floor" },
-    { label: "Occupancy", key: "occupancy" },
+    { label: "Construction Type", key: "occupancy" },
     { label: "Usage", key: "usage" },
   ];
   const floorColumns = [
@@ -230,7 +223,7 @@ import { Margin } from "@mui/icons-material";
     { label: "Establishment Name", key: "establishmentName" },
     { label: "Flat No", key: "flatNo" },
     { label: "Floor", key: "floor" },
-    { label: "Occupancy", key: "occupancy" },
+    { label: "Construction Type", key: "occupancy" },
     { label: "Usage", key: "usage" },
   ];
     const handleOpenDialog = (title, content) => {
@@ -396,7 +389,7 @@ import { Margin } from "@mui/icons-material";
                             <TableCell sx={{ border: "2px solid black", backgroundColor: "#eb3f2f", color: "white" }}>Establishment Name</TableCell>
                             <TableCell sx={{ border: "2px solid black", backgroundColor: "#eb3f2f", color: "white" }}>Flat No</TableCell>
                             <TableCell sx={{ border: "2px solid black", backgroundColor: "#eb3f2f", color: "white" }}>Floor</TableCell>
-                            <TableCell sx={{ border: "2px solid black", backgroundColor: "#eb3f2f", color: "white" }}>Occupancy</TableCell>
+                            <TableCell sx={{ border: "2px solid black", backgroundColor: "#eb3f2f", color: "white" }}>Construction Type</TableCell>
                             <TableCell sx={{ border: "2px solid black", backgroundColor: "#eb3f2f", color: "white" }}>Usage</TableCell>
                             </TableRow>
                         </TableHead>

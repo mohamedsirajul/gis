@@ -903,9 +903,9 @@ const Fad = () => {
                               fontWeight: "bold",
                             }}
                           >
-                            Establishment
+                            Area Calculation
                           </TableCell>
-                          <TableCell
+                          {/* <TableCell
                             style={{
                               border: "2px solid black",
                               textAlign: "center",
@@ -914,7 +914,7 @@ const Fad = () => {
                             }}
                           >
                             Establishment Name
-                          </TableCell>
+                          </TableCell> */}
                           <TableCell
                             style={{
                               border: "2px solid black",
@@ -933,7 +933,7 @@ const Fad = () => {
                               fontWeight: "bold",
                             }}
                           >
-                            Occupancy
+                            Construction Type
                           </TableCell>
                           <TableCell
                             style={{
@@ -1001,16 +1001,16 @@ const Fad = () => {
                                 textAlign: "center",
                               }}
                             >
-                              {floor.establishment}
+                              {floor.area_calculation}
                             </TableCell>
-                            <TableCell
+                            {/* <TableCell
                               style={{
                                 border: "2px solid black",
                                 textAlign: "center",
                               }}
                             >
                               {floor.establishmentName}
-                            </TableCell>
+                            </TableCell> */}
                             <TableCell
                               style={{
                                 border: "2px solid black",
@@ -1692,7 +1692,7 @@ const Fad = () => {
                                   fontWeight: "bold",
                                 }}
                               >
-                                Occupancy
+                                Construction Type
                               </TableCell>
                               <TableCell
                                 style={{

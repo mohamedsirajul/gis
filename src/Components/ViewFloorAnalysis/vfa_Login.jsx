@@ -63,7 +63,7 @@ export default function VfaAdminLogin() {
 
     try {
       const response = await fetch(
-        `https://luisnellai.xyz/siraj/admin/vfa_login.php`,
+        `https://terralensinnovations.com/siraj/admin/vfa_login.php`,
         {
           method: "POST",
           headers: {

@@ -27,7 +27,7 @@ const SViewSurvey = () => {
     const fetchTasks = async () => {
       try {
         const response = await fetch(
-          `https://luisnellai.xyz/siraj/admin/get_assigned_task.php/${user_id}`
+          `https://terralensinnovations.com/siraj/admin/get_assigned_task.php/${user_id}`
         );
         if (!response.ok) {
           throw new Error("Network response was not ok");

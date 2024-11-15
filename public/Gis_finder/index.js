@@ -87,7 +87,10 @@ window.updateSubmittedGisId = function(gisId) {
 window.addEventListener('load', function() {
     try {
         const storedGisIds = JSON.parse(localStorage.getItem('submittedGisIds') || '[]');
-        storedGisIds.forEach(gisId => submittedGisIds.add(gisId));
+        storedGisIds.forEach(gisId => {
+            submittedGisIds.add(gisId);
+            window.updateBuildingColor(gisId, 'rgba(0,255,0,0.8)');
+        });
         lyr_building_ppt.changed();
     } catch (error) {
         console.error('Error loading submitted GIS IDs:', error);

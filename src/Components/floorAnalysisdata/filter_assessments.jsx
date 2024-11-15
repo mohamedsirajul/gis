@@ -41,7 +41,7 @@ import { Margin } from "@mui/icons-material";
         const fetchProperties = async () => {
         try {
             const response = await fetch(
-            `https://luisnellai.xyz/siraj/admin/getAllassesmentInfo.php`
+            `https://terralensinnovations.com/siraj/admin/getAllassesmentInfo.php`
             );
             if (!response.ok) {
             throw new Error("Network response was not ok");

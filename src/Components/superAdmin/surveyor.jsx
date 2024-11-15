@@ -58,7 +58,7 @@ const Surveyor = () => {
   const fetchUsers = async () => {
     try {
       const response = await fetch(
-        "https://luisnellai.xyz/siraj/admin/getAllUsers.php"
+        "https://terralensinnovations.com/siraj/admin/getAllUsers.php"
       );
       if (!response.ok) {
         throw new Error("Network response was not ok");
@@ -152,7 +152,7 @@ const Surveyor = () => {
 
     try {
       const response = await fetch(
-        "https://luisnellai.xyz/siraj/admin/add_user.php",
+        "https://terralensinnovations.com/siraj/admin/add_user.php",
         {
           method: "POST",
           headers: {

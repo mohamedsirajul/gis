@@ -185,7 +185,7 @@ function App() {
 
   useEffect(() => {
     if (selectedBillNo) {
-      fetch("https://luisnellai.xyz/siraj/getbybillno.php", {
+      fetch("https://terralensinnovations.com/siraj/getbybillno.php", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -206,7 +206,7 @@ function App() {
   }, [selectedBillNo]);
 
   useEffect(() => {
-    fetch("https://luisnellai.xyz/siraj/getproperty.php")
+    fetch("https://terralensinnovations.com/siraj/getproperty.php")
       .then((response) => response.json())
       .then((data) => {
         setData(data);
@@ -371,7 +371,7 @@ function App() {
 
   //   try {
   //     const response = await fetch(
-  //       "https://luisnellai.xyz/siraj/postbuildingdata.php",
+  //       "https://terralensinnovations.com/siraj/postbuildingdata.php",
   //       {
   //         method: "POST",
   //         body: formData, // Pass FormData object as body
@@ -423,7 +423,7 @@ function App() {
 
     try {
       const response = await fetch(
-        "https://luisnellai.xyz/siraj/postbuildingdata.php",
+        "https://terralensinnovations.com/siraj/postbuildingdata.php",
         {
           method: "POST",
           body: formData,

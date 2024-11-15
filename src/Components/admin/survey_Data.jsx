@@ -39,12 +39,13 @@ const ViewSurvey = () => {
     const fetchProperties = async () => {
       try {
         const response = await fetch(
-          `https://luisnellai.xyz/siraj/getallbuildingdata.php/${user_id}`
+          `https://terralensinnovations.com/siraj/getallbuildingdata.php/${user_id}`
         );
         if (!response.ok) {
           throw new Error("Network response was not ok");
         }
         const data = await response.json();
+        console.log(data);
         setProperties(data.properties || []); // Ensure data.properties is defined or default to an empty array
         setLoading(false);
       } catch (error) {

@@ -49,7 +49,7 @@ function AddDroneCsv() {
 
     try {
       const response = await axios.post(
-        "https://luisnellai.xyz/siraj/adddronecsv.php", // Adjust the URL as per your server endpoint for drone CSV
+        "https://terralensinnovations.com/siraj/adddronecsv.php", // Adjust the URL as per your server endpoint for drone CSV
         formData,
         {
           headers: {

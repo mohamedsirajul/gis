@@ -55,7 +55,7 @@ const AssignTask = () => {
     const fetchUser = async () => {
       try {
         const response = await fetch(
-          `https://luisnellai.xyz/siraj/admin/getUserbyId.php/${user_id}`
+          `https://terralensinnovations.com/siraj/admin/getUserbyId.php/${user_id}`
         );
         if (!response.ok) {
           throw new Error("Network response was not ok");
@@ -72,7 +72,7 @@ const AssignTask = () => {
     const fetchProperties = async () => {
       try {
         const response = await fetch(
-          "https://luisnellai.xyz/siraj/getproperty.php"
+          "https://terralensinnovations.com/siraj/getproperty.php"
         );
         if (!response.ok) {
           throw new Error("Network response was not ok");
@@ -234,7 +234,7 @@ const AssignTask = () => {
     // Example fetch request (uncomment and customize as needed)
     try {
       const response = await fetch(
-        "https://luisnellai.xyz/siraj/admin/task_assigned.php",
+        "https://terralensinnovations.com/siraj/admin/task_assigned.php",
         {
           method: "POST",
           headers: {

@@ -51,7 +51,7 @@ const AdminData = () => {
   const fetchData = async () => {
     try {
       const response = await axios.get(
-        "https://luisnellai.xyz/siraj/admin/getAllAdmin.php"
+        "https://terralensinnovations.com/siraj/admin/getAllAdmin.php"
       );
       setAdmins(response.data);
       setLoading(false);
@@ -154,7 +154,7 @@ const AdminData = () => {
       setPosting(true); // Set loading state to true when posting data
       try {
         const response = await axios.post(
-          "https://luisnellai.xyz/siraj/admin/add_admin.php",
+          "https://terralensinnovations.com/siraj/admin/add_admin.php",
           newAdmin
         );
         setSuccessMessage("Admin added successfully!");

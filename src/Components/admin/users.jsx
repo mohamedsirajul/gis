@@ -63,7 +63,7 @@ const Surveyors = () => {
   const fetchSurveyors = async () => {
     try {
       const response = await axios.get(
-        "https://luisnellai.xyz/siraj/admin/getAllUsers.php"
+        "https://terralensinnovations.com/siraj/admin/getAllUsers.php"
       );
       setSurveyors(response.data);
       setLoading(false);
@@ -165,7 +165,7 @@ const Surveyors = () => {
     if (validateForm()) {
       try {
         const response = await axios.post(
-          "https://luisnellai.xyz/siraj/admin/add_user.php",
+          "https://terralensinnovations.com/siraj/admin/add_user.php",
           newSurveyor
         );
         setSuccessMessage("Surveyor added successfully!");

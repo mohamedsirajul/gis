@@ -56,7 +56,7 @@ const Vfa = () => {
 
     try {
       const response = await axios.post(
-        "https://luisnellai.xyz/siraj/get_all_filter_data.php",
+        "https://terralensinnovations.com/siraj/get_all_filter_data.php",
         {
           fromDate: fromDate,
           toDate: toDate,
@@ -111,7 +111,7 @@ const Vfa = () => {
   const fetchDataByAssessmentNo = (assessmentNo) => {
     const requestBody = { assessmentNo: assessmentNo };
 
-    fetch("https://luisnellai.xyz/siraj/get_data_byassono.php", {
+    fetch("https://terralensinnovations.com/siraj/get_data_byassono.php", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

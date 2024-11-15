@@ -159,7 +159,7 @@ function PropertyDetails() {
 
   useEffect(() => {
     const user_id = localStorage.getItem("user_id");
-    fetch(`https://luisnellai.xyz/siraj/admin/get_assigned_task.php/${user_id}`)
+    fetch(`https://terralensinnovations.com/siraj/admin/get_assigned_task.php/${user_id}`)
       .then((response) => response.json())
       .then((data) => {
         setData(data);
@@ -218,7 +218,7 @@ function PropertyDetails() {
       const selectedBillNo = value;
       if (selectedBillNo) {
         // Fetch and update data when Bill Number is selected
-        fetch("https://luisnellai.xyz/siraj/getbybillno.php", {
+        fetch("https://terralensinnovations.com/siraj/getbybillno.php", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -334,7 +334,7 @@ function PropertyDetails() {
   
     try {
       const response = await fetch(
-        "https://luisnellai.xyz/siraj/postbuildingdata.php",
+        "https://terralensinnovations.com/siraj/postbuildingdata.php",
         {
           method: "POST",
           body: formData,
@@ -433,7 +433,7 @@ function PropertyDetails() {
   const user_id = localStorage.getItem("user_id");
   // console.log(user_id);
   useEffect(() => {
-    fetch(`https://luisnellai.xyz/siraj/admin/get_assigned_task.php/${user_id}`)
+    fetch(`https://terralensinnovations.com/siraj/admin/get_assigned_task.php/${user_id}`)
       .then((response) => response.json())
       .then((data) => {
         setData(data);
@@ -450,7 +450,7 @@ function PropertyDetails() {
   }, []);
 
   useEffect(() => {
-    fetch("https://luisnellai.xyz/siraj/get_trade.php")
+    fetch("https://terralensinnovations.com/siraj/get_trade.php")
       .then((response) => {
         if (!response.ok) {
           throw new Error("Network response was not ok");
@@ -483,7 +483,7 @@ function PropertyDetails() {
     }
 
     try {
-      const response = await fetch("https://luisnellai.xyz/siraj/editstreetdata.php", {
+      const response = await fetch("https://terralensinnovations.com/siraj/editstreetdata.php", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

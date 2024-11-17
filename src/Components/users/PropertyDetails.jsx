@@ -52,6 +52,7 @@ const buildingTypeOptions = [
   // "Flat",
   // "Hostel",
     "Independent Building",
+    "Flat / Apartment",
     "Government Property",
     "Cinema Theatre" ,
     "Education Institution",
@@ -518,7 +519,16 @@ function PropertyDetails() {
     setLoading(true);
 
     try {
-      // Format floor information with calculated values
+      // Determine which assessment number to use
+      const finalAssessmentNo = proptype ? generatedAssessmentNo : assmtNo;
+      
+      console.log('Submit Debug:', {
+        proptype,
+        generatedAssessmentNo,
+        assmtNo,
+        finalAssessmentNo
+      });
+
       const formattedFloorInfo = floorInformation.map((floor, index) => {
         const baseArea = index === 0 ? selectedAreaofplot : floor.area;
         const percentage = parseFloat(floor.flatNo) || 0;
@@ -534,12 +544,11 @@ function PropertyDetails() {
         };
       });
 
-      // Main payload structure
       const payload = {
         user_id: localStorage.getItem("user_id"),
         property_details: {
           gis_id: Gisid || "",
-          assessment_no: assmtNo || "",
+          assessment_no: finalAssessmentNo || "", // Use the determined assessment number
           old_assessment_no: OldassmtNo || "",
           ward_no: selectedWard || "",
           road_name: selectedStreet || "",
@@ -576,8 +585,8 @@ function PropertyDetails() {
         }
       };
 
-      console.log(payload);
-    
+      console.log('Final payload:', payload);
+
       // Create FormData and append the payload
       const formData = new FormData();
       formData.append("jsonData", JSON.stringify(payload));
@@ -608,45 +617,42 @@ function PropertyDetails() {
 
       // Only show success message after final submit
       if (result.success) {
-        // Store all GIS IDs in localStorage
-        if (result.all_gis_ids) {
-          localStorage.setItem('submittedGisIds', JSON.stringify(result.all_gis_ids));
-          console.log("Stored GIS IDs:", result.all_gis_ids);
-        }
+        // Update the submitted GIS IDs
+        const existingGisIds = JSON.parse(localStorage.getItem('submitted_gisid') || '[]');
+    
+    // Add the new GIS ID if it's not already in the array
+    if (!existingGisIds.includes(Gisid)) {
+        existingGisIds.push(Gisid);
+        
+        // Store the updated array back in localStorage
+        localStorage.setItem('submitted_gisid', JSON.stringify(existingGisIds));
+    }
 
+            
         setSuccessMessage("Building data submitted successfully!");
         setErrorMessage("");
         setOpenSnackbar(true);
         
+        // Store in localStorage for persistence
+        const submittedGisIds = JSON.parse(localStorage.getItem('submittedGisIds') || '[]');
+        submittedGisIds.push(Gisid);
+        localStorage.setItem('submittedGisIds', JSON.stringify(submittedGisIds));
+        
         setTimeout(() => {
-          resetForm();
-          setActiveStep(0);
+            resetForm();
+            setActiveStep(0);
         }, 2000);
       }
 
     } catch (error) {
-      console.error("Submission Error:", error);
+      console.error('Error in handleSubmit:', error);
       setErrorMessage("Failed to submit building data: " + error.message);
       setSuccessMessage("");
-      setOpenSnackbar(true);
+      setOpenSnackbar(true);  // Only open snackbar after final submit
     } finally {
       setLoading(false);
     }
   };
-
-  // Add a useEffect to load GIS IDs when component mounts
-  useEffect(() => {
-    const loadSubmittedGisIds = () => {
-      const storedIds = localStorage.getItem('submittedGisIds');
-      if (storedIds) {
-        const parsedIds = JSON.parse(storedIds);
-        console.log("Loaded stored GIS IDs:", parsedIds);
-        // You can use these IDs as needed in your component
-      }
-    };
-
-    loadSubmittedGisIds();
-  }, []);
 
   // Update the resetForm function
   const resetForm = () => {
@@ -809,14 +815,14 @@ function PropertyDetails() {
     }
   }, [selectedOwner, data]);
 
-  const handleRadioChange = (event) => {
-    if (event.target.value === "old") {
-      setpropType(false)
-    }
-    if (event.target.value === "new") {
-      setpropType(true)
-  }
-  };
+  // const handleRadioChange = (event) => {
+  //   if (event.target.value === "old") {
+  //     setpropType(false)
+  //   }
+  //   if (event.target.value === "new") {
+  //     setpropType(true)
+  // }
+  // };
 
   // To retrieve the GISID
   const storedGISID = localStorage.getItem('selectedGISID');
@@ -849,6 +855,53 @@ function PropertyDetails() {
     setGisId(e.target.value);
     setGisIdSource('manual');
   };
+
+  // Update the generateBillNumber function to maintain consistent formatting
+  const generateBillNumber = () => {
+    const now = new Date();
+    const year = now.getFullYear().toString().slice(-2);
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    
+    // Format: YY/MM/HHMMSS
+    const billNumber = `${year}${month}/${day}/${hours}${minutes}${seconds}`;
+    
+    // Format assessment number to match bill number format: YY/MM/HHMMSS
+    const assessmentNumber = `${year}${month}/${day}/${hours}${minutes}${seconds}`;
+    
+    return { billNumber, assessmentNumber };
+  };
+
+  // Update the handleRadioChange function
+  const handleRadioChange = (event) => {
+    if (event.target.value === "old") {
+      setpropType(false);
+      setSelectedBillNo("");
+      setassmtNo("");
+      setGeneratedAssessmentNo("");
+    }
+    if (event.target.value === "new") {
+      setpropType(true);
+      const { billNumber, assessmentNumber } = generateBillNumber();
+      setSelectedBillNo(billNumber);
+      setGeneratedAssessmentNo(assessmentNumber);
+      
+      // Clear other fields
+      setSelectedDoorNo("");
+      setSelectedOwner("");
+      setselectedAreaofplot("");
+      setSelectedMobile("");
+      setSelectedZone("");
+      setOldassmtNo("");
+      setusagename("");
+    }
+  };
+
+  // Add this to your state declarations at the top of the component
+  const [generatedAssessmentNo, setGeneratedAssessmentNo] = useState("");
 
   return (
     <div>
@@ -1089,7 +1142,7 @@ function PropertyDetails() {
                     label="Ward Number"
                     variant="outlined"
                     value={selectedWard}
-                    onChange={(e, newValue) => setSelectedWard(newValue)}
+                    onChange={(e) => setSelectedWard(e.target.value)}
                   />
                                         
                 </FormControl>
@@ -1111,7 +1164,7 @@ function PropertyDetails() {
                     label="Road Name"
                     variant="outlined"
                     value={selectedStreet}
-                    onChange={(e, newValue) => setSelectedStreet(newValue)}
+                    onChange={(e) => setSelectedStreet(e.target.value)}
                   />
                                         
                 </FormControl>
@@ -1134,7 +1187,7 @@ function PropertyDetails() {
                     label="Bill Number"
                     variant="outlined"
                     value={selectedBillNo}
-                    onChange={(e, newValue) => setSelectedBillNo(newValue)}
+                    onChange={(e) => setSelectedBillNo(e.target.value)}
                   />
                                         
                 </FormControl>
@@ -1214,7 +1267,7 @@ function PropertyDetails() {
                     label="Name of Assessee"
                     variant="outlined"
                     value={selectedOwner}
-                    onChange={(e, newValue) => setSelectedOwner(newValue)}
+                    onChange={(e, newValue) => setSelectedOwner(e.target.value)}
                   />
                                         
                 </FormControl>

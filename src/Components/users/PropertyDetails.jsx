@@ -608,30 +608,19 @@ function PropertyDetails() {
 
       // Only show success message after final submit
       if (result.success) {
-        // Update the submitted GIS IDs
-        const existingGisIds = JSON.parse(localStorage.getItem('submitted_gisid') || '[]');
-    
-    // Add the new GIS ID if it's not already in the array
-    if (!existingGisIds.includes(Gisid)) {
-        existingGisIds.push(Gisid);
-        
-        // Store the updated array back in localStorage
-        localStorage.setItem('submitted_gisid', JSON.stringify(existingGisIds));
-    }
+        // Store all GIS IDs in localStorage
+        if (result.all_gis_ids) {
+          localStorage.setItem('submittedGisIds', JSON.stringify(result.all_gis_ids));
+          console.log("Stored GIS IDs:", result.all_gis_ids);
+        }
 
-            
         setSuccessMessage("Building data submitted successfully!");
         setErrorMessage("");
         setOpenSnackbar(true);
         
-        // Store in localStorage for persistence
-        const submittedGisIds = JSON.parse(localStorage.getItem('submittedGisIds') || '[]');
-        submittedGisIds.push(Gisid);
-        localStorage.setItem('submittedGisIds', JSON.stringify(submittedGisIds));
-        
         setTimeout(() => {
-            resetForm();
-            setActiveStep(0);
+          resetForm();
+          setActiveStep(0);
         }, 2000);
       }
 
@@ -639,11 +628,25 @@ function PropertyDetails() {
       console.error("Submission Error:", error);
       setErrorMessage("Failed to submit building data: " + error.message);
       setSuccessMessage("");
-      setOpenSnackbar(true);  // Only open snackbar after final submit
+      setOpenSnackbar(true);
     } finally {
       setLoading(false);
     }
   };
+
+  // Add a useEffect to load GIS IDs when component mounts
+  useEffect(() => {
+    const loadSubmittedGisIds = () => {
+      const storedIds = localStorage.getItem('submittedGisIds');
+      if (storedIds) {
+        const parsedIds = JSON.parse(storedIds);
+        console.log("Loaded stored GIS IDs:", parsedIds);
+        // You can use these IDs as needed in your component
+      }
+    };
+
+    loadSubmittedGisIds();
+  }, []);
 
   // Update the resetForm function
   const resetForm = () => {

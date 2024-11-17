@@ -12,9 +12,8 @@ var overlayPopup = new ol.Overlay({
 });
 
 var view = new ol.View({
-    center: [0, 0],
-    zoom: 7,
-    maxZoom: 32,
+    zoom: 16, // Changed from 7 to 16 for closer initial view
+    maxZoom: 20,
     minZoom: 1,
     projection: 'EPSG:3857'
 });
@@ -69,7 +68,10 @@ var map = new ol.Map({
 });
 
 var originalExtent = [8560234.043578, 1234399.643779, 8563649.882101, 1236292.160363];
-map.getView().fit(originalExtent, map.getSize());
+map.getView().fit(originalExtent, {
+    size: map.getSize(),
+    maxZoom: 8
+});
 
 var currentInteraction;
 

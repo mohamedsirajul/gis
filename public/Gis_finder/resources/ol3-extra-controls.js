@@ -67,19 +67,38 @@ ol.control.Geolocation = function() {
     var button = document.createElement('button');
     button.innerHTML = '<i class="glyphicon glyphicon-map-marker"></i>';
     
-    var showLocationInstructions = function() {
-        var message = 'To use location services:\n\n' +
-            '1. Make sure you\'re using HTTPS or localhost\n' +
-            '2. Click "Allow" when your browser asks for location permission\n' +
-            '3. Make sure location services are enabled on your device';
-            
+    var checkGPSStatus = function() {
+        return new Promise((resolve, reject) => {
+            if ('permissions' in navigator) {
+                navigator.permissions.query({ name: 'geolocation' })
+                    .then(function(permissionStatus) {
+                        if (permissionStatus.state === 'granted') {
+                            resolve(true);
+                        } else {
+                            resolve(false);
+                        }
+                    });
+            } else {
+                resolve(true); // Can't check permissions, proceed with regular flow
+            }
+        });
+    };
+
+    var showLocationSettings = function() {
         bootbox.dialog({
             title: 'Location Access Required',
-            message: message,
+            message: '<div class="text-center">' +
+                    '<p>To use location services, please ensure:</p>' +
+                    '<ol class="text-left">' +
+                    '<li>You\'re using HTTPS or localhost</li>' +
+                    '<li>Location permissions are allowed for this site</li>' +
+                    '<li>Device GPS/Location services are enabled</li>' +
+                    '</ol>' +
+                    '</div>',
             buttons: {
-                ok: {
+                retry: {
                     label: 'Try Again',
-                    className: 'btn-primary',
+                    className: 'btn-success',
                     callback: function() {
                         setupGeolocation();
                     }
@@ -98,37 +117,40 @@ ol.control.Geolocation = function() {
             return;
         }
 
-        if (this_.geolocation) {
-            if (this_.geolocation.getTracking()) {
-                this_.getMap().removeOverlay(this_.marker);
-                this_.geolocation.setTracking(false);
-                button.classList.remove('active');
+        checkGPSStatus().then(function(enabled) {
+            if (enabled) {
+                if (this_.geolocation) {
+                    if (this_.geolocation.getTracking()) {
+                        this_.getMap().removeOverlay(this_.marker);
+                        this_.geolocation.setTracking(false);
+                        button.classList.remove('active');
+                    } else {
+                        enableTracking();
+                    }
+                } else {
+                    setupGeolocation();
+                }
             } else {
-                enableTracking();
+                showLocationSettings();
             }
-        } else {
-            setupGeolocation();
-        }
+        });
     };
 
     var setupGeolocation = function() {
-        // First check if we can get a position
         navigator.geolocation.getCurrentPosition(
             function(position) {
-                // Success - now set up the OpenLayers geolocation
                 initializeGeolocation();
             },
             function(error) {
-                // Handle specific error cases
                 switch(error.code) {
                     case error.PERMISSION_DENIED:
-                        showLocationInstructions();
+                        showLocationSettings();
                         break;
                     case error.POSITION_UNAVAILABLE:
-                        bootbox.alert('Location information is unavailable');
+                        bootbox.alert('Location information is unavailable. Please check if your GPS is enabled.');
                         break;
                     case error.TIMEOUT:
-                        bootbox.alert('Location request timed out');
+                        bootbox.alert('Location request timed out. Please try again.');
                         break;
                     default:
                         bootbox.alert('An unknown error occurred getting your location');
@@ -643,4 +665,59 @@ ol.control.TimeLine.prototype.refreshTimeLayers = function() {
         }
     }
 };
+
+function initializeAutoLocation() {
+    if (!navigator.geolocation) {
+        console.log('Geolocation is not supported by your browser');
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+        function(position) {
+            var coordinates = ol.proj.fromLonLat([
+                position.coords.longitude,
+                position.coords.latitude
+            ]);
+            
+            // Set map center and zoom
+            map.getView().setCenter(coordinates);
+            map.getView().setZoom(16);
+
+            // Add location marker
+            var markerElement = document.createElement('div');
+            markerElement.innerHTML = '<i class="glyphicon glyphicon-map-marker location-marker"></i>';
+            
+            var marker = new ol.Overlay({
+                element: markerElement,
+                positioning: 'center-center',
+                stopEvent: false,
+                position: coordinates
+            });
+            
+            map.addOverlay(marker);
+        },
+        function(error) {
+            console.log('Error getting location:', error.message);
+        },
+        {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
+        }
+    );
+}
+
+// Add this to your existing window.addEventListener('load', ...) block
+window.addEventListener('load', function() {
+    try {
+        // Your existing code...
+        startLine: 88
+        endLine: 97
+
+        // Add this line to initialize location
+        initializeAutoLocation();
+    } catch (error) {
+        console.error('Error:', error);
+    }
+});
 

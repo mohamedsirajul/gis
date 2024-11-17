@@ -215,6 +215,13 @@ const AssignTask = () => {
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Add validation check
+    if (filteredProperties.length === 0) {
+      alert("Please select at least one property before assigning the task.");
+      return;
+    }
+
     setLoading(true);
 
     const combinedStreetNames = [

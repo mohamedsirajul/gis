@@ -340,16 +340,34 @@ button.ol-full-screen-true:after {
 
 /*Geolocation*/
 .geolocation-control {
-  top: 130px;
-  left: .5em;
+    top: 65px;
+    left: 1em;
+    z-index: 1000;
 }
 
 .geolocation-control button {
-    float: right;
-    background-image: url('data:image/png;base64,R0lGODlhEAAQALMAAJmZzMzM/2aZzJnM/2bM/8DAwPf3583NzczMzAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAEAAAUALAAAAAAQABAAQARVsMhJqxzCYMPFMB4VCAJyGAdCBtVYnulqScFgs9aIGAApAAYVrqDj+YDCWe02azqJPd9vOOntaoHgj4I5jD6YwCF0EXgFBI1ATJZYDVgtIBc9Up+WCAA7') /*logo.png*/;
-    background-repeat: no-repeat;
-    background-position: 2px;
+    background-color: rgba(255,255,255,0.9);
+    color: #666;
     border: none;
+    border-radius: 4px;
+    padding: 8px 14px;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+}
+
+.geolocation-control button i {
+    font-size: 20px;
+}
+
+.geolocation-control button.active {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.geolocation-control button:hover {
+    background-color: #f4f4f4;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 /*Layers list*/
@@ -893,3 +911,10 @@ display: inline;
   }
 .expandableList li input:checked + ul > li { display: block; margin: 0 0 0.125em;  /* 2px */}
 .expandableList li input:checked + ul > li:last-child { margin: 0 0 0.063em; /* 1px */ }
+
+.location-marker {
+    color: #0066ff;
+    font-size: 24px;
+    text-shadow: 2px 2px 3px rgba(0,0,0,0.3);
+    pointer-events: none;
+}

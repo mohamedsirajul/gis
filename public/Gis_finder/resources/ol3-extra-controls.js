@@ -61,40 +61,126 @@ ol.inherits(ol.control.HomeButton, ol.control.Control);
 //=======================================================
 
 ol.control.Geolocation = function() {
+    var this_ = this;
+    
+    // Create button with location icon
+    var button = document.createElement('button');
+    button.innerHTML = '<i class="glyphicon glyphicon-map-marker"></i>';
+    
+    var showLocationInstructions = function() {
+        var message = 'To use location services:\n\n' +
+            '1. Make sure you\'re using HTTPS or localhost\n' +
+            '2. Click "Allow" when your browser asks for location permission\n' +
+            '3. Make sure location services are enabled on your device';
+            
+        bootbox.dialog({
+            title: 'Location Access Required',
+            message: message,
+            buttons: {
+                ok: {
+                    label: 'Try Again',
+                    className: 'btn-primary',
+                    callback: function() {
+                        setupGeolocation();
+                    }
+                },
+                cancel: {
+                    label: 'Cancel',
+                    className: 'btn-default'
+                }
+            }
+        });
+    };
 
-    this_ = this;
-    geolocate = function(){
-        if (this_.geolocation){
-            if (this_.geolocation.getTracking()){
-                this_.getMap().removeOverlay(this_.marker)
-                this_.geolocation.setTracking(false)
-            }
-            else{
-                this_.getMap().addOverlay(this_.marker)
-                this_.geolocation.setTracking(true)
-                view.setCenter(this_.geolocation.getPosition());
-            }
+    var geolocate = function() {
+        if (!navigator.geolocation) {
+            bootbox.alert('Geolocation is not supported by your browser');
+            return;
         }
-        else{
-            var view = this_.getMap().getView();
-            this_.geolocation = new ol.Geolocation({
-                    projection: view.getProjection(),
-                    tracking: true
-            });
-            view.setCenter(this_.geolocation.getPosition());
-            this_.geolocation.on('change', function(evt) {
-                view.setCenter(this_.geolocation.getPosition());
-            });
-            this_.marker = new ol.Overlay({
-                element: /** @type {Element} */ ($('<i/>').addClass('icon-flag').get(0)),
-                positioning: 'bottom-left',
-                stopEvent: false
-            });
-            this_.marker.bindTo('position', this_.geolocation);
-            this_.getMap().addOverlay(this_.marker);
+
+        if (this_.geolocation) {
+            if (this_.geolocation.getTracking()) {
+                this_.getMap().removeOverlay(this_.marker);
+                this_.geolocation.setTracking(false);
+                button.classList.remove('active');
+            } else {
+                enableTracking();
+            }
+        } else {
+            setupGeolocation();
         }
     };
-    var button = document.createElement('button');
+
+    var setupGeolocation = function() {
+        // First check if we can get a position
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                // Success - now set up the OpenLayers geolocation
+                initializeGeolocation();
+            },
+            function(error) {
+                // Handle specific error cases
+                switch(error.code) {
+                    case error.PERMISSION_DENIED:
+                        showLocationInstructions();
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        bootbox.alert('Location information is unavailable');
+                        break;
+                    case error.TIMEOUT:
+                        bootbox.alert('Location request timed out');
+                        break;
+                    default:
+                        bootbox.alert('An unknown error occurred getting your location');
+                        break;
+                }
+                button.classList.remove('active');
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            }
+        );
+    };
+
+    var initializeGeolocation = function() {
+        var view = this_.getMap().getView();
+        this_.geolocation = new ol.Geolocation({
+            projection: view.getProjection(),
+            tracking: true,
+            trackingOptions: {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            }
+        });
+
+        this_.geolocation.on('change:position', function() {
+            var position = this_.geolocation.getPosition();
+            if (position) {
+                view.setCenter(position);
+                view.setZoom(16);
+            }
+        });
+
+        // Create position marker
+        this_.marker = new ol.Overlay({
+            element: $('<i/>').addClass('glyphicon glyphicon-map-marker location-marker').get(0),
+            positioning: 'center-center',
+            stopEvent: false
+        });
+        
+        this_.marker.bindTo('position', this_.geolocation);
+        this_.getMap().addOverlay(this_.marker);
+        button.classList.add('active');
+    };
+
+    var enableTracking = function() {
+        this_.getMap().addOverlay(this_.marker);
+        this_.geolocation.setTracking(true);
+        button.classList.add('active');
+    };
 
     button.addEventListener('click', geolocate, false);
     button.addEventListener('touchstart', geolocate, false);
@@ -104,9 +190,8 @@ ol.control.Geolocation = function() {
     element.appendChild(button);
 
     ol.control.Control.call(this, {
-      element: element,
+        element: element
     });
-
 };
 ol.inherits(ol.control.Geolocation, ol.control.Control);
 

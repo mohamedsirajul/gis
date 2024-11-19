@@ -54,7 +54,7 @@ function Addcsv() {
 
     try {
       const response = await axios.post(
-        "https://terralensinnovations.com/siraj/addcsv.php",
+        "https://luisnellai.xyz/siraj/addcsv.php",
         formData,
         {
           headers: {

@@ -39,7 +39,7 @@ const ViewSurvey = () => {
     const fetchProperties = async () => {
       try {
         const response = await fetch(
-          `https://terralensinnovations.com/siraj/getallbuildingdata.php/${user_id}`
+          `https://luisnellai.xyz/siraj/getallbuildingdata.php/${user_id}`
         );
         if (!response.ok) {
           throw new Error("Network response was not ok");
@@ -230,7 +230,7 @@ const ViewSurvey = () => {
                             <CardMedia
                               component="img"
                               height="400"
-                              image={`data:image/jpeg;base64,${property.image}`}
+                              image={property.image_url}
                               alt={property.BuildingName}
                             />
                           )

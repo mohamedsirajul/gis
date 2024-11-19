@@ -24,16 +24,30 @@ const SViewSurvey = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchTasks = async () => {
+    const fetchTasks = async () => {  
       try {
         const response = await fetch(
-          `https://terralensinnovations.com/siraj/admin/get_assigned_task.php/${user_id}`
+          `https://luisnellai.xyz/siraj/admin/get_assigned_task.php/${user_id}`,
+          {
+            method: "GET",
+            headers: {
+              "Accept": "application/json",
+              "Content-Type": "application/json",
+              "Cache-Control": "no-cache, no-store, must-revalidate",
+              "Pragma": "no-cache",
+              "Expires": "0"
+            },
+            credentials: 'omit' // Important for CORS
+          }
         );
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
         const data = await response.json();
-        setTask(data); // Assuming data structure { properties: [...] }
+        console.log('API Response:', data); // Debug log
+        
+        if (data.status === "success") {
+          setTask(data.tasks || []);
+        } else {
+          throw new Error(data.message || "Failed to fetch tasks");
+        }
         setLoading(false);
       } catch (error) {
         setError(error);

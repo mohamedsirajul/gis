@@ -46,26 +46,51 @@ const ViewSurvey = () => {
   const [removing, setRemoving] = useState(false);
   const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' });
 
-  const fetchTasks = async () => {
-    try {
-      const response = await fetch(
-        `https://terralensinnovations.com/siraj/admin/get_assigned_task.php/${user_id}`
-      );
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
-      const data = await response.json();
-      setTask(data);
-      setLoading(false);
-    } catch (error) {
-      setError(error);
-      setLoading(false);
-    }
+  const handleBack = () => {
+    window.location.href = "/users";
   };
 
   useEffect(() => {
     fetchTasks();
   }, [user_id]);
+
+  const fetchTasks = async () => {
+    try {
+      setLoading(true);
+     const response = await fetch(
+          `https://luisnellai.xyz/siraj/admin/get_assigned_task.php/${user_id}`,
+          {
+            method: "GET",
+            headers: {
+              "Accept": "application/json",
+              "Content-Type": "application/json",
+              "Cache-Control": "no-cache, no-store, must-revalidate",
+              "Pragma": "no-cache",
+              "Expires": "0"
+            },
+            credentials: 'omit' // Important for CORS
+          }
+        );
+      
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      
+      const data = await response.json();
+      console.log('API Response:', data); // Debug log
+      
+      if (data.status === "success") {
+        setTask(data.tasks || []);
+      } else {
+        throw new Error(data.message || "Failed to fetch tasks");
+      }
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleEditClick = () => {
     setSelectedWard("");
@@ -87,10 +112,9 @@ const ViewSurvey = () => {
       );
 
       const userId = tasksToRemove[0]?.user_id;
-      
       const assessmentNumbers = tasksToRemove.map(task => task.AssesmentNo);
 
-      const response = await fetch('https://terralensinnovations.com/siraj/admin/remove_assinedtask.php', {
+      const response = await fetch('https://luisnellai.xyz/siraj/admin/remove_assinedtask.php', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -103,12 +127,20 @@ const ViewSurvey = () => {
         }),
       });
 
-      if (response.ok) {
+      const result = await response.json();
+
+      if (response.ok && result.status === 'success') {
         setNotification({ open: true, message: 'Tasks removed successfully', severity: 'success' });
-        await fetchTasks();
+        setTask(prevTasks => prevTasks.filter(task => 
+          !(task.WardName === selectedWard && task.StreetName === selectedStreet)
+        ));
         setOpenDialog(false);
       } else {
-        setNotification({ open: true, message: 'Failed to remove tasks', severity: 'error' });
+        setNotification({ 
+          open: true, 
+          message: result.message || 'Failed to remove tasks', 
+          severity: 'error' 
+        });
       }
     } catch (error) {
       console.error('Error removing tasks:', error);
@@ -118,17 +150,26 @@ const ViewSurvey = () => {
     }
   };
 
+  const handleDialogClose = () => {
+    setOpenDialog(false);
+    fetchTasks();
+  };
+
   if (loading) {
     return <CircularProgress />;
   }
 
   if (error) {
-    return <Alert severity="error">Error: {error.message}</Alert>;
+    return <Alert severity="error">Error: {error}</Alert>;
   }
 
-  const handleBack = () => {
-    window.location.href = "/users";
-  };
+  if (!tasks || tasks.length === 0) {
+    return (
+      <Container>
+        <Alert severity="info">No tasks assigned for User ID: {user_id}</Alert>
+      </Container>
+    );
+  }
 
   return (
     <>
@@ -182,7 +223,7 @@ const ViewSurvey = () => {
 
             <Dialog 
               open={openDialog} 
-              onClose={() => setOpenDialog(false)}
+              onClose={handleDialogClose}
               maxWidth="sm"
               fullWidth
             >
@@ -222,7 +263,7 @@ const ViewSurvey = () => {
                 </FormControl>
               </DialogContent>
               <DialogActions>
-                <Button onClick={() => setOpenDialog(false)} disabled={removing}>Cancel</Button>
+                <Button onClick={handleDialogClose} disabled={removing}>Cancel</Button>
                 <Button 
                   onClick={handleRemove} 
                   color="error"

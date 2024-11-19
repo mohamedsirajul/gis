@@ -63,7 +63,7 @@ export default function FadAdminLogin() {
 
     try {
       const response = await fetch(
-        `https://terralensinnovations.com/siraj/admin/fad_login.php`,
+        `https://luisnellai.xyz/siraj/admin/fad_login.php`,
         {
           method: "POST",
           headers: {

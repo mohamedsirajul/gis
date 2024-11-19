@@ -50,7 +50,7 @@ const ViewVfa = () => {
 
     try {
       const response = await axios.post(
-        "https://terralensinnovations.com/siraj/get_all_filter_data.php",
+        "https://luisnellai.xyz/siraj/get_all_filter_data.php",
         {
           fromDate: fromDate,
           toDate: toDate,

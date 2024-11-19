@@ -15,6 +15,14 @@ import {
   IconButton,
   Menu,
   MenuItem,
+  Box,
+  TableContainer,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  Paper,
 } from "@mui/material";
 import { Card, Container, Row, Col } from "react-bootstrap";
 import AddIcon from "@mui/icons-material/Add";
@@ -22,6 +30,11 @@ import AccountCircle from "@mui/icons-material/AccountCircle";
 import LogoutIcon from "@mui/icons-material/Logout";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import dayjs from 'dayjs';
 const Surveyors = () => {
   const [surveyors, setSurveyors] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -54,6 +67,13 @@ const Surveyors = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const menuOpen = Boolean(anchorEl);
 
+  // Add these new state variables
+  const [openSurveyLog, setOpenSurveyLog] = useState(false);
+  const [fromDate, setFromDate] = useState(null);
+  const [toDate, setToDate] = useState(null);
+  const [surveyLogs, setSurveyLogs] = useState([]);
+  const [showSurveyResults, setShowSurveyResults] = useState(false);
+
   // Fetch surveyor data on component mount
   useEffect(() => {
     fetchSurveyors();
@@ -63,7 +83,7 @@ const Surveyors = () => {
   const fetchSurveyors = async () => {
     try {
       const response = await axios.get(
-        "https://terralensinnovations.com/siraj/admin/getAllUsers.php"
+        "https://luisnellai.xyz/siraj/admin/getAllUsers.php"
       );
       setSurveyors(response.data);
       setLoading(false);
@@ -165,7 +185,7 @@ const Surveyors = () => {
     if (validateForm()) {
       try {
         const response = await axios.post(
-          "https://terralensinnovations.com/siraj/admin/add_user.php",
+          "https://luisnellai.xyz/siraj/admin/add_user.php",
           newSurveyor
         );
         setSuccessMessage("Surveyor added successfully!");
@@ -214,6 +234,40 @@ const Surveyors = () => {
     window.location.href = "/";
   };
 
+  const handleOpenSurveyLog = () => {
+    setOpenSurveyLog(true);
+    setShowSurveyResults(false);
+    setFromDate(null);
+    setToDate(null);
+  };
+
+  const handleCloseSurveyLog = () => {
+    setOpenSurveyLog(false);
+    setShowSurveyResults(false);
+  };
+
+  const fetchSurveyLogs = async () => {
+    if (!fromDate || !toDate) {
+      setErrorMessage("Please select both dates");
+      return;
+    }
+
+    try {
+      const formattedFromDate = dayjs(fromDate).format('YYYY-MM-DD');
+      const formattedToDate = dayjs(toDate).format('YYYY-MM-DD');
+      
+      const response = await axios.get(
+        `https://luisnellai.xyz/siraj/getsurveylog.php?from_date=${formattedFromDate}&to_date=${formattedToDate}`
+      );
+
+      setSurveyLogs(response.data.data);
+      setShowSurveyResults(true);
+    } catch (error) {
+      setErrorMessage("Failed to fetch survey logs");
+      console.error("Error fetching survey logs:", error);
+    }
+  };
+
   if (loading) {
     return (
       <Container
@@ -244,6 +298,14 @@ const Surveyors = () => {
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             Surveyor Management
           </Typography>
+          <Button
+            color="inherit"
+            onClick={handleOpenSurveyLog}
+            startIcon={<CalendarTodayIcon />}
+            sx={{ mr: 2 }}
+          >
+            Survey Log
+          </Button>
           <IconButton
             size="large"
             aria-label="account of current user"
@@ -417,6 +479,84 @@ const Surveyors = () => {
             {errorMessage}
           </Alert>
         )}
+        {/* Add the Survey Log Dialog */}
+        <Dialog 
+          open={openSurveyLog} 
+          onClose={handleCloseSurveyLog}
+          maxWidth="md"
+          fullWidth
+        >
+          <DialogTitle>Survey Log</DialogTitle>
+          <DialogContent>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, my: 2 }}>
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <DatePicker
+                  label="From Date"
+                  value={fromDate}
+                  onChange={(newValue) => setFromDate(newValue)}
+                  renderInput={(params) => <TextField {...params} />}
+                  fullWidth
+                />
+                <DatePicker
+                  label="To Date"
+                  value={toDate}
+                  onChange={(newValue) => setToDate(newValue)}
+                  renderInput={(params) => <TextField {...params} />}
+                  fullWidth
+                />
+              </LocalizationProvider>
+              <Button
+                variant="contained"
+                onClick={fetchSurveyLogs}
+                sx={{ mt: 2 }}
+              >
+                Show Results
+              </Button>
+            </Box>
+
+            {showSurveyResults && (
+              <TableContainer component={Paper} sx={{ mt: 2 }}>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Date</TableCell>
+                      <TableCell>User Name</TableCell>
+                      <TableCell align="right">Survey Count</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {surveyLogs.map((dateLog) => (
+                      <>
+                        {dateLog.users.map((user, userIndex) => (
+                          <TableRow key={`${dateLog.survey_date}-${user.user_id}`}>
+                            {userIndex === 0 && (
+                              <TableCell rowSpan={dateLog.users.length}>
+                                {dateLog.survey_date}
+                              </TableCell>
+                            )}
+                            <TableCell>{user.user_name}</TableCell>
+                            <TableCell align="right">{user.survey_count}</TableCell>
+                          </TableRow>
+                        ))}
+                        <TableRow>
+                          <TableCell colSpan={2} sx={{ fontWeight: 'bold' }}>
+                            Total for {dateLog.survey_date}
+                          </TableCell>
+                          <TableCell align="right" sx={{ fontWeight: 'bold' }}>
+                            {dateLog.total_surveys}
+                          </TableCell>
+                        </TableRow>
+                      </>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseSurveyLog}>Close</Button>
+          </DialogActions>
+        </Dialog>
       </Container>
     </>
   );

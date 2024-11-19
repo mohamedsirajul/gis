@@ -290,7 +290,7 @@ function PropertyDetails() {
 
   useEffect(() => {
     if (selectedBillNo) {
-      fetch("https://terralensinnovations.com/siraj/getbybillno.php", {
+      fetch("https://luisnellai.xyz/siraj/getbybillno.php", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -320,24 +320,43 @@ function PropertyDetails() {
   const user_id = localStorage.getItem("user_id");
   // console.log(user_id);
   useEffect(() => {
-    fetch(`https://terralensinnovations.com/siraj/admin/get_assigned_task.php/${user_id}`)
-      .then((response) => response.json())
-      .then((data) => {
-        setData(data);
-        console.log(data);
-        const uniqueWards = [...new Set(data.map((item) => item.WardName))];
-        setWardOptions(uniqueWards);
+    const fetchData = async () => {
+      try {
+        const response = await fetch(`https://luisnellai.xyz/siraj/admin/get_assigned_task.php/${user_id}`);
+        const result = await response.json();
+        
+        // Check if result has the expected structure
+        if (result.status === "success" && Array.isArray(result.tasks)) {
+          setData(result.tasks);
+          
+          // Get unique ward names
+          const uniqueWards = [...new Set(result.tasks.map((item) => item.WardName))];
+          setWardOptions(uniqueWards);
 
-        const ownerNames = data.map((item) => item.Owner_name);
-        setOwnerOptions(ownerNames);      
-      })
-      .catch((error) => {
+          // Get owner names
+          const ownerNames = [...new Set(result.tasks.map((item) => item.Owner_name))];
+          setOwnerOptions(ownerNames);
+        } else {
+          console.error('API response not in expected format:', result);
+          setData([]);
+          setWardOptions([]);
+          setOwnerOptions([]);
+        }
+      } catch (error) {
         console.error("Error fetching data:", error);
-      });
-  }, []);
+        setData([]);
+        setWardOptions([]);
+        setOwnerOptions([]);
+      }
+    };
+
+    if (user_id) {
+      fetchData();
+    }
+  }, [user_id]);
 
   useEffect(() => {
-    fetch("https://terralensinnovations.com/siraj/get_trade.php")
+    fetch("https://luisnellai.xyz/siraj/get_trade.php")
       .then((response) => {
         if (!response.ok) {
           throw new Error("Network response was not ok");
@@ -548,7 +567,7 @@ function PropertyDetails() {
         user_id: localStorage.getItem("user_id"),
         property_details: {
           gis_id: Gisid || "",
-          assessment_no: finalAssessmentNo || "", // Use the determined assessment number
+          assessment_no: finalAssessmentNo || "",
           old_assessment_no: OldassmtNo || "",
           ward_no: selectedWard || "",
           road_name: selectedStreet || "",
@@ -601,7 +620,7 @@ function PropertyDetails() {
 
       // Make the API call
       const response = await fetch(
-        "https://terralensinnovations.com/siraj/postbuildingdata.php",
+        "https://luisnellai.xyz/siraj/postbuildingdata.php",
         {
           method: "POST",
           body: formData
@@ -615,32 +634,18 @@ function PropertyDetails() {
       const result = await response.json();
       console.log("API Response:", result);
 
-      // Only show success message after final submit
       if (result.success) {
-        // Update the submitted GIS IDs
-        const existingGisIds = JSON.parse(localStorage.getItem('submitted_gisid') || '[]');
-    
-    // Add the new GIS ID if it's not already in the array
-    if (!existingGisIds.includes(Gisid)) {
-        existingGisIds.push(Gisid);
+        // Refresh GIS IDs
+        await fetchGisIds();
         
-        // Store the updated array back in localStorage
-        localStorage.setItem('submitted_gisid', JSON.stringify(existingGisIds));
-    }
-
-            
         setSuccessMessage("Building data submitted successfully!");
         setErrorMessage("");
         setOpenSnackbar(true);
         
-        // Store in localStorage for persistence
-        const submittedGisIds = JSON.parse(localStorage.getItem('submittedGisIds') || '[]');
-        submittedGisIds.push(Gisid);
-        localStorage.setItem('submittedGisIds', JSON.stringify(submittedGisIds));
-        
+        // Reset form after short delay
         setTimeout(() => {
-            resetForm();
-            setActiveStep(0);
+          resetForm();
+          setActiveStep(0);
         }, 2000);
       }
 
@@ -648,7 +653,7 @@ function PropertyDetails() {
       console.error('Error in handleSubmit:', error);
       setErrorMessage("Failed to submit building data: " + error.message);
       setSuccessMessage("");
-      setOpenSnackbar(true);  // Only open snackbar after final submit
+      setOpenSnackbar(true);
     } finally {
       setLoading(false);
     }
@@ -772,7 +777,7 @@ function PropertyDetails() {
     }
 
     try {
-      const response = await fetch("https://terralensinnovations.com/siraj/editstreetdata.php", {
+      const response = await fetch("https://luisnellai.xyz/siraj/editstreetdata.php", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -902,6 +907,47 @@ function PropertyDetails() {
 
   // Add this to your state declarations at the top of the component
   const [generatedAssessmentNo, setGeneratedAssessmentNo] = useState("");
+
+  // Define fetchGisIds inside the component
+  const fetchGisIds = async () => {
+    try {
+     const response = await fetch('https://luisnellai.xyz/siraj/getGisIds.php', {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      },
+      credentials: 'omit' // Important for CORS
+    });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        return data.gisIds;
+      } else {
+        console.error('Failed to fetch GIS IDs:', data.message);
+        return [];
+      }
+    } catch (error) {
+      console.error('Error fetching GIS IDs:', error);
+      return [];
+    }
+  };
+
+  // Update useEffect to use the simplified fetchGisIds
+  useEffect(() => {
+    fetchGisIds().then(gisIds => {
+      // Store the GIS IDs in localStorage
+      localStorage.setItem('submittedGisIds', JSON.stringify(gisIds));
+    });
+  }, []); // Empty dependency array means this runs once when component mounts
 
   return (
     <div>
@@ -1741,16 +1787,14 @@ function PropertyDetails() {
                 variant="contained"
                 color="primary"
                 onClick={handleSubmit}
-                disabled={loading}
-                startIcon={
-                  loading && <CircularProgress size={20} color="inherit" />
-                }
+                disabled={loading || !selectedFile}
+                startIcon={loading && <CircularProgress size={20} color="inherit" />}
               >
                 Final Submit
               </Button>
               <Snackbar
                 open={openSnackbar}
-                autoHideDuration={6000} // Adjust as needed
+                autoHideDuration={6000}
                 onClose={handleCloseSnackbar}
               >
                 <MuiAlert

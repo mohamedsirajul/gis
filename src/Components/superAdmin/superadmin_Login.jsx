@@ -63,7 +63,7 @@ export default function SuperAdminLogin() {
 
     try {
       const response = await fetch(
-        `https://terralensinnovations.com/siraj/admin/sadmin_login.php`,
+        `https://luisnellai.xyz/siraj/admin/sadmin_login.php`,
         {
           method: "POST",
           headers: {

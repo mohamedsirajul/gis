@@ -41,22 +41,26 @@ import { Margin } from "@mui/icons-material";
         const fetchProperties = async () => {
         try {
             const response = await fetch(
-            `https://terralensinnovations.com/siraj/admin/getAllassesmentInfo.php`
+                "https://luisnellai.xyz/siraj/admin/getAllassesmentInfo.php"
             );
             if (!response.ok) {
             throw new Error("Network response was not ok");
             }
             const data = await response.json();
-            setProperties(data.properties || []); // Ensure data.properties is defined or default to an empty array
-            setLoading(false);
+            if (data.status === "success") {
+                setProperties(data.properties || []);
+            } else {
+                throw new Error(data.message || "Failed to fetch data");
+            }
         } catch (error) {
-            setError(error);
+            setError(error.message);
+        } finally {
             setLoading(false);
         }
         };
 
         fetchProperties();
-    });
+    }, []);
     const handleBack = () => {
         window.location.href = "/users";
     };
@@ -525,7 +529,7 @@ import { Margin } from "@mui/icons-material";
                     <CardMedia
                     component="img"
                     height="400"
-                    image={`data:image/jpeg;base64,${property.image}`}
+                    image={property.image}
                     alt={property.BuildingName}
                     />
                 )

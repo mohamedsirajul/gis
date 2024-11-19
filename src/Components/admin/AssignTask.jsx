@@ -55,7 +55,7 @@ const AssignTask = () => {
     const fetchUser = async () => {
       try {
         const response = await fetch(
-          `https://terralensinnovations.com/siraj/admin/getUserbyId.php/${user_id}`
+          `https://luisnellai.xyz/siraj/admin/getUserbyId.php/${user_id}`
         );
         if (!response.ok) {
           throw new Error("Network response was not ok");
@@ -71,18 +71,29 @@ const AssignTask = () => {
 
     const fetchProperties = async () => {
       try {
-        const response = await fetch(
-          "https://terralensinnovations.com/siraj/getproperty.php"
-        );
+        const response = await fetch('https://luisnellai.xyz/siraj/getproperty.php', {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          },
+          credentials: 'omit'
+        });
+        
         if (!response.ok) {
-          throw new Error("Network response was not ok");
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
+        
         const data = await response.json();
-        console.log(data);
+        console.log('Current properties:', data);
         setProperties(data);
         setLoading(false);
-      } catch (error) {
-        setError(error);
+      } catch (err) {
+        console.error('Fetch error:', err);
+        setError(err.message);
         setLoading(false);
       }
     };
@@ -90,6 +101,10 @@ const AssignTask = () => {
     fetchUser();
     fetchProperties();
   }, [user_id]);
+
+  useEffect(() => {
+    console.log('Current properties:', properties);
+  }, [properties]);
 
   const handleWardChange = (e, index = null) => {
     const { name, value } = e.target;
@@ -241,7 +256,7 @@ const AssignTask = () => {
     // Example fetch request (uncomment and customize as needed)
     try {
       const response = await fetch(
-        "https://terralensinnovations.com/siraj/admin/task_assigned.php",
+        "https://luisnellai.xyz/siraj/admin/task_assigned.php",
         {
           method: "POST",
           headers: {

@@ -56,7 +56,7 @@ const FadData = () => {
   const fetchUsers = async () => {
     try {
       const response = await fetch(
-        "https://terralensinnovations.com/siraj/getAllFad.php"
+        "https://luisnellai.xyz/siraj/getAllFad.php"
       );
       if (!response.ok) {
         throw new Error("Network response was not ok");
@@ -150,7 +150,7 @@ const FadData = () => {
 
     try {
       const response = await fetch(
-        "https://terralensinnovations.com/siraj/admin/add_fad_admin.php",
+        "https://luisnellai.xyz/siraj/admin/add_fad_admin.php",
         {
           method: "POST",
           headers: {

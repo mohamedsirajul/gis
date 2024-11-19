@@ -56,7 +56,7 @@ const VfaData = () => {
   const fetchUsers = async () => {
     try {
       const response = await fetch(
-        "https://terralensinnovations.com/siraj/getAllVfa.php"
+        "https://luisnellai.xyz/siraj/getAllVfa.php"
       );
       if (!response.ok) {
         throw new Error("Network response was not ok");
@@ -154,7 +154,7 @@ const VfaData = () => {
 
     try {
       const response = await fetch(
-        "https://terralensinnovations.com/siraj/admin/add_vfa_admin.php",
+        "https://luisnellai.xyz/siraj/admin/add_vfa_admin.php",
         {
           method: "POST",
           headers: {

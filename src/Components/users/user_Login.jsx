@@ -63,7 +63,7 @@ export default function AdminLogin() {
 
     try {
       const response = await fetch(
-        `https://terralensinnovations.com/siraj/admin/user_login.php`,
+        `https://luisnellai.xyz/siraj/admin/user_login.php`,
         {
           method: "POST",
           headers: {

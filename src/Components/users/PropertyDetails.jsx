@@ -27,6 +27,7 @@ import {
   StepLabel,
   CircularProgress,
   Snackbar,Dialog, DialogActions, DialogContent, DialogTitle,
+  Chip,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -164,6 +165,7 @@ function PropertyDetails() {
       usage: "",
       occupancy: "",
       flatNo: "",
+      profTaxNo: "",
       establishment: "",
       establishmentName: "",
     },
@@ -232,6 +234,7 @@ function PropertyDetails() {
         usage: "",
         occupancy: "",
         flatNo: "",
+        profTaxNo: "",
         establishment: "",
         establishmentName: "",
       },
@@ -251,6 +254,11 @@ function PropertyDetails() {
           const percentage = parseFloat(value) || 0;
           const calculatedArea = (baseArea * percentage) / 100;
           updates.calculatedArea = calculatedArea.toFixed(2);
+        }
+        
+        // Clear prof tax numbers if usage is changed from Commercial
+        if (name === 'usage' && value !== 'Commercial') {
+          updates.profTaxNo = "";
         }
         
         return { ...item, ...updates };
@@ -548,20 +556,15 @@ function PropertyDetails() {
         finalAssessmentNo
       });
 
-      const formattedFloorInfo = floorInformation.map((floor, index) => {
-        const baseArea = index === 0 ? selectedAreaofplot : floor.area;
-        const percentage = parseFloat(floor.flatNo) || 0;
-        const calculatedArea = (baseArea * percentage) / 100;
-
-        return {
-          floor_no: floor.floor || "",
-          floor_area: baseArea || "0",
-          floor_usage: floor.usage || "",
-          construction_type: floor.occupancy || "",
-          percentage_used: floor.flatNo || "0",
-          calculated_area: calculatedArea.toString()
-        };
-      });
+      const formattedFloorInfo = floorInformation.map((floor) => ({
+        floor_no: floor.floor || "",
+        floor_area: floor.area || "0",
+        floor_usage: floor.usage || "",
+        construction_type: floor.occupancy || "",
+        percentage_used: floor.flatNo || "0",
+        calculated_area: calculatedValues[floor.id]?.toString() || "0",
+        prof_tax_no: floor.profTaxNo || "",
+      }));
 
       const payload = {
         user_id: localStorage.getItem("user_id"),
@@ -710,6 +713,7 @@ function PropertyDetails() {
         usage: "",
         occupancy: "",
         flatNo: "",
+        profTaxNo: "",
         establishment: "",
         establishmentName: "",
       },
@@ -948,6 +952,50 @@ function PropertyDetails() {
       localStorage.setItem('submittedGisIds', JSON.stringify(gisIds));
     });
   }, []); // Empty dependency array means this runs once when component mounts
+
+  // Add this to your existing state declarations
+  const [profTaxOptions, setProfTaxOptions] = useState([]);
+  const [profTaxLoading, setProfTaxLoading] = useState(false);
+  const [profTaxError, setProfTaxError] = useState(null);
+
+  // Add this useEffect to fetch prof tax numbers
+  useEffect(() => {
+    const fetchProfTaxNumbers = async () => {
+      setProfTaxLoading(true);
+      setProfTaxError(null);
+      
+      try {
+        const response = await fetch("https://luisnellai.xyz/siraj/getProfTaxNumbers.php", {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Cache-Control': 'no-cache'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+          setProfTaxOptions(data.profTaxNumbers);
+          console.log(`Loaded ${data.count} prof tax numbers`);
+        } else {
+          throw new Error(data.message || 'Failed to load prof tax numbers');
+        }
+      } catch (error) {
+        console.error('Error fetching prof tax numbers:', error);
+        setProfTaxError(error.message);
+        message.error('Failed to load prof tax numbers');
+      } finally {
+        setProfTaxLoading(false);
+      }
+    };
+
+    fetchProfTaxNumbers();
+  }, []); // Empty dependency array means this runs once on component mount
 
   return (
     <div>
@@ -1574,6 +1622,7 @@ function PropertyDetails() {
                       </FormControl>
                     </Col>
                   </Row>
+                  
                   <Row className="mt-3">
                     <Col md={6}>
                       <FormControl fullWidth className="mt-3">
@@ -1594,6 +1643,26 @@ function PropertyDetails() {
                           }}
                         />
                         <p>{calculatedValues[floor.id] ? `${calculatedValues[floor.id]} Sqft` : ''}</p>
+                      </FormControl>
+                    </Col>
+                     <Col md={6}>
+                      <FormControl fullWidth className="mt-3">
+                        <Autocomplete
+                          options={profTaxOptions}
+                          value={floor.profTaxNo || ''}
+                          onChange={(e, newValue) => {
+                            handleFloorChange(floor.id, {
+                              target: { name: 'profTaxNo', value: newValue }
+                            });
+                          }}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              label={`Prof Tax No for Floor ${floor.floor || index + 1}`}
+                              variant="outlined"
+                            />
+                          )}
+                        />
                       </FormControl>
                     </Col>
                     {/* <Col md={6}>
@@ -1625,6 +1694,7 @@ function PropertyDetails() {
                       )}
                     </Col> */}
                   </Row>
+                   
                   <Row className="mt-3">
                     {/* <Col md={6}>
                       {floor.usage === "Residential" ? null : (
@@ -1650,6 +1720,7 @@ function PropertyDetails() {
                       </IconButton>
                     </Col>
                   </Row>
+       
                 </Paper>
               ))}
               <MuiButton

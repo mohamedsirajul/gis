@@ -82,7 +82,9 @@ import { Margin } from "@mui/icons-material";
                 if (nestedItem.hasOwnProperty(column.key)) {
                   // Special handling for occupancy field to use "Construction Type" label
                   if (column.key === 'occupancy') {
-                    row['Construction Type'] = nestedItem[column.key];
+                    row['Building Type'] = nestedItem[column.key];
+                  } else if (column.key === 'prof_tax_no') {
+                    row['Prof Tax No'] = nestedItem[column.key] || '';
                   } else {
                     row[column.label] = nestedItem[column.key];
                   }
@@ -111,7 +113,9 @@ import { Margin } from "@mui/icons-material";
               columns.forEach(column => {
                 // Special handling for occupancy field to use "Construction Type" label
                 if (column.key === 'occupancy') {
-                  row['Construction Type'] = nestedItem[column.key];
+                  row['Building Type'] = nestedItem[column.key];
+                } else if (column.key === 'prof_tax_no') {
+                  row['Prof Tax No'] = nestedItem[column.key] || '';
                 } else {
                   row[column.label] = nestedItem[column.key];
                 }
@@ -202,7 +206,7 @@ import { Margin } from "@mui/icons-material";
     { label: "Ward Name", key: "Ward" },
     { label: "Street Name", key: "Street" },
     { label: "Ownership", key: "property_ownership" },
-    { label: "Building Type", key: "buildingtype" },
+    { label: "Building Type", key: "occupancy" },
     { label: "GIS ID", key: "Gisid" },
     { label: "Assessment No", key: "AssessmentNo" },
     { label: "Old Assessment No", key: "oldAssessmentNo" },
@@ -218,8 +222,9 @@ import { Margin } from "@mui/icons-material";
     { label: "Establishment Name", key: "establishmentName" },
     { label: "Flat No", key: "flatNo" },
     { label: "Floor", key: "floor" },
-    { label: "Construction Type", key: "occupancy" },
+    { label: "Building Type", key: "occupancy" },
     { label: "Usage", key: "usage" },
+    { label: "Prof Tax No", key: "prof_tax_no" },
   ];
   const floorColumns = [
     { label: "Area", key: "area" },
@@ -227,8 +232,9 @@ import { Margin } from "@mui/icons-material";
     { label: "Establishment Name", key: "establishmentName" },
     { label: "Flat No", key: "flatNo" },
     { label: "Floor", key: "floor" },
-    { label: "Construction Type", key: "occupancy" },
+    { label: "Building Type", key: "occupancy" },
     { label: "Usage", key: "usage" },
+    { label: "Prof Tax No", key: "prof_tax_no" },
   ];
     const handleOpenDialog = (title, content) => {
         setDialogTitle(title);
@@ -393,8 +399,9 @@ import { Margin } from "@mui/icons-material";
                             <TableCell sx={{ border: "2px solid black", backgroundColor: "#eb3f2f", color: "white" }}>Establishment Name</TableCell>
                             <TableCell sx={{ border: "2px solid black", backgroundColor: "#eb3f2f", color: "white" }}>Flat No</TableCell>
                             <TableCell sx={{ border: "2px solid black", backgroundColor: "#eb3f2f", color: "white" }}>Floor</TableCell>
-                            <TableCell sx={{ border: "2px solid black", backgroundColor: "#eb3f2f", color: "white" }}>Construction Type</TableCell>
+                            <TableCell sx={{ border: "2px solid black", backgroundColor: "#eb3f2f", color: "white" }}>Building Type</TableCell>
                             <TableCell sx={{ border: "2px solid black", backgroundColor: "#eb3f2f", color: "white" }}>Usage</TableCell>
+                            <TableCell sx={{ border: "2px solid black", backgroundColor: "#eb3f2f", color: "white" }}>Prof Tax No</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -408,6 +415,7 @@ import { Margin } from "@mui/icons-material";
                                 <TableCell sx={{ border: "2px solid black" }}>{floor.floor}</TableCell>
                                 <TableCell sx={{ border: "2px solid black" }}>{floor.occupancy}</TableCell>
                                 <TableCell sx={{ border: "2px solid black" }}>{floor.usage}</TableCell>
+                                <TableCell sx={{ border: "2px solid black" }}>{floor.prof_tax_no || '-'}</TableCell>
                                 </TableRow>
                             )
                             )}
@@ -529,7 +537,7 @@ import { Margin } from "@mui/icons-material";
                     <CardMedia
                     component="img"
                     height="400"
-                    image={property.image}
+                    image={property.image_url}
                     alt={property.BuildingName}
                     />
                 )

@@ -248,7 +248,6 @@ function PropertyDetails() {
         // Get base area based on floor number
         const baseArea = item.floor === 0 ? selectedAreaofplot : item.area;
         
-        console.log(baseArea);
         // Calculate area if percentage is being changed
         let updates = { [name]: value };
         if (name === 'flatNo') { // percentage field
@@ -550,22 +549,22 @@ function PropertyDetails() {
       // Determine which assessment number to use
       const finalAssessmentNo = proptype ? generatedAssessmentNo : assmtNo;
       
-      // Format floor information
-      const formattedFloorInfo = floorInformation.map((floor, index) => {
-        const baseArea = index === 0 ? selectedAreaofplot : floor.area;
-        const percentage = parseFloat(floor.flatNo) || 0;
-        const calculatedArea = ((baseArea * percentage) / 100).toFixed(2);
-
-        return {
-          floor_no: floor.floor.toString() || "",
-          floor_area: baseArea.toString() || "0",
-          floor_usage: floor.usage || "",
-          construction_type: floor.occupancy || "",
-          percentage_used: floor.flatNo || "0",
-          calculated_area: calculatedArea.toString(),
-          prof_tax_no: floor.profTaxNo || ""
-        };
+      console.log('Submit Debug:', {
+        proptype,
+        generatedAssessmentNo,
+        assmtNo,
+        finalAssessmentNo
       });
+
+      const formattedFloorInfo = floorInformation.map((floor) => ({
+        floor_no: floor.floor || "",
+        floor_area: floor.area || "0",
+        floor_usage: floor.usage || "",
+        construction_type: floor.occupancy || "",
+        percentage_used: floor.flatNo || "0",
+        calculated_area: calculatedValues[floor.id]?.toString() || "0",
+        prof_tax_no: floor.profTaxNo || "",
+      }));
 
       const payload = {
         user_id: localStorage.getItem("user_id"),

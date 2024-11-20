@@ -86,6 +86,7 @@ const Surveyors = () => {
         "https://luisnellai.xyz/siraj/admin/getAllUsers.php"
       );
       setSurveyors(response.data);
+
       setLoading(false);
     } catch (error) {
       setError(error);
@@ -365,13 +366,18 @@ const Surveyors = () => {
         >
           Add Surveyor
         </Button> */}
+        
         <Row xs={1} md={2} className="g-4">
           {surveyors.map((surveyor) => (
             <Col key={surveyor.id}>
               <Card>
                 <Card.Body>
-                  <Card.Title>{surveyor.name}</Card.Title>
                   <Card.Text>
+                  
+                    <strong>User Name:</strong> {surveyor.name}
+                    <br />
+                    <strong>User Id:</strong> {surveyor.user_id}
+                    <br />
                     <strong>Email:</strong> {surveyor.email}
                     <br />
                     <strong>Mobile:</strong> {surveyor.mobile}

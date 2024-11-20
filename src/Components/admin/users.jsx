@@ -290,6 +290,9 @@ const Surveyors = () => {
       </Container>
     );
   }
+  const FilterAd = () => {
+    window.location.href = "/filterad";
+  }
 
   return (
     <>
@@ -298,6 +301,13 @@ const Surveyors = () => {
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             Surveyor Management
           </Typography>
+          <Button
+            color="inherit"
+            onClick={FilterAd}
+            sx={{ mr: 2 }}
+          >
+            Survey Data 
+          </Button>
           <Button
             color="inherit"
             onClick={handleOpenSurveyLog}

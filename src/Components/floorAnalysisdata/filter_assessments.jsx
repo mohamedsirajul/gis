@@ -69,20 +69,23 @@ import { Margin } from "@mui/icons-material";
     const generateAllCSVData = (data, columns, nestedKey = null) => {
         let result = [];
         data.forEach(item => {
+          const formattedDoorNo = item.DoorNo ? item.DoorNo.replace('-', '/') : '';
+          
           if (nestedKey && item[nestedKey]) {
             item[nestedKey].forEach(nestedItem => {
-              const row = { 'Assessment No': item.AssessmentNo }; 
+              const row = { 
+                'Assessment No': item.AssessmentNo,
+                'Door No': formattedDoorNo,
+                'Building Type': item.buildingtype || '',
+              }; 
               columns.forEach(column => {
-                // Check if the column key exists in the top-level item
                 if (item.hasOwnProperty(column.key)) {
                   row[column.label] = item[column.key];
                 }
                 
-                // Check if the column key exists in the nested item
                 if (nestedItem.hasOwnProperty(column.key)) {
-                  // Special handling for occupancy field to use "Construction Type" label
                   if (column.key === 'occupancy') {
-                    row['Building Type'] = nestedItem[column.key];
+                    row['Construction Type'] = nestedItem[column.key];
                   } else if (column.key === 'prof_tax_no') {
                     row['Prof Tax No'] = nestedItem[column.key] || '';
                   } else {
@@ -93,8 +96,11 @@ import { Margin } from "@mui/icons-material";
               result.push(row);
             });
           } else {
-            // Handle non-nested data
-            const row = { 'Assessment No': item.AssessmentNo };
+            const row = { 
+              'Assessment No': item.AssessmentNo,
+              'Door No': formattedDoorNo,
+              'Building Type': item.buildingtype || '',
+            };
             columns.forEach(column => {
               row[column.label] = item[column.key];
             });

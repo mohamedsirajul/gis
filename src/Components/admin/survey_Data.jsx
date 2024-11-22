@@ -22,9 +22,17 @@ import {
   DialogTitle,
   CardMedia,
   Typography,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Checkbox,
+  ListItemText,
+  OutlinedInput,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import EditIcon from '@mui/icons-material/Edit';
 
 const ViewSurvey = () => {
   const { user_id } = useParams();
@@ -34,6 +42,12 @@ const ViewSurvey = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [dialogContent, setDialogContent] = useState(null);
   const [dialogTitle, setDialogTitle] = useState("");
+  const [openGisDialog, setOpenGisDialog] = useState(false);
+  const [selectedGisId, setSelectedGisId] = useState('');
+  const [selectedAssessments, setSelectedAssessments] = useState([]);
+  const [newGisId, setNewGisId] = useState('');
+  const [showNewGisInput, setShowNewGisInput] = useState(false);
+  const [allGisIds, setAllGisIds] = useState([]);
 
   useEffect(() => {
     const fetchProperties = async () => {
@@ -72,6 +86,79 @@ const ViewSurvey = () => {
     setDialogTitle("");
   };
 
+  const handleOpenGisDialog = () => {
+    setAllGisIds(getUniqueGisIds());
+    setSelectedGisId('');
+    setSelectedAssessments([]);
+    setOpenGisDialog(true);
+  };
+
+  const handleCloseGisDialog = () => {
+    setOpenGisDialog(false);
+    setSelectedAssessments([]);
+    setNewGisId('');
+    setShowNewGisInput(false);
+  };
+
+  const handleAssessmentChange = (event) => {
+    const value = event.target.value;
+    if (value[value.length - 1] === 'all') {
+      setSelectedAssessments(
+        selectedAssessments.length === getAssessmentsByGisId(selectedGisId).length
+          ? []
+          : getAssessmentsByGisId(selectedGisId)
+      );
+      return;
+    }
+    setSelectedAssessments(value);
+  };
+
+  const getAssessmentsByGisId = (gisId) => {
+    return properties
+      .filter(property => property.Gisid === gisId)
+      .map(property => property.AssessmentNo);
+  };
+
+  const handleUpdateGisId = async () => {
+    try {
+      const response = await fetch('https://luisnellai.xyz/siraj/updateGisId.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          oldGisId: selectedGisId,
+          newGisId: newGisId,
+          assessmentNumbers: selectedAssessments
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update GIS ID');
+      }
+
+      const result = await response.json();
+      alert(result.message);
+      handleCloseGisDialog();
+      // Refresh the data
+      window.location.reload();
+    } catch (error) {
+      alert('Error updating GIS ID: ' + error.message);
+    }
+  };
+
+  const getUniqueGisIds = () => {
+    const uniqueGisIds = [...new Set(properties.map(property => property.Gisid))];
+    return uniqueGisIds.filter(id => id); // Remove any null/empty values
+  };
+
+  const handleGisIdSelect = (event) => {
+    setSelectedGisId(event.target.value);
+    setSelectedAssessments([]);
+    setShowNewGisInput(false);
+    setNewGisId('');
+  };
+
   if (loading) {
     return <CircularProgress />;
   }
@@ -87,7 +174,14 @@ const ViewSurvey = () => {
           <IconButton edge="start" color="inherit" onClick={handleBack}>
             <ArrowBackIcon />
           </IconButton>
-          <Typography variant="h6">Survey Data</Typography>
+          <Typography variant="h6" style={{ flexGrow: 1 }}>Survey Data</Typography>
+          <Button
+            color="inherit"
+            startIcon={<EditIcon />}
+            onClick={handleOpenGisDialog}
+          >
+            Edit GIS ID
+          </Button>
         </Toolbar>
       </AppBar>
       <Container>
@@ -258,6 +352,85 @@ const ViewSurvey = () => {
           <Button onClick={handleCloseDialog} color="primary">
             Close
           </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog open={openGisDialog} onClose={handleCloseGisDialog} maxWidth="sm" fullWidth>
+        <DialogTitle>Edit GIS ID</DialogTitle>
+        <DialogContent>
+          <FormControl fullWidth sx={{ mt: 2 }}>
+            <InputLabel>Select GIS ID</InputLabel>
+            <Select
+              value={selectedGisId}
+              onChange={handleGisIdSelect}
+              input={<OutlinedInput label="Select GIS ID" />}
+            >
+              {allGisIds.map((gisId) => (
+                <MenuItem key={gisId} value={gisId}>
+                  {gisId}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          {selectedGisId && (
+            <FormControl fullWidth sx={{ mt: 2 }}>
+              <InputLabel>Select Assessment Numbers</InputLabel>
+              <Select
+                multiple
+                value={selectedAssessments}
+                onChange={handleAssessmentChange}
+                input={<OutlinedInput label="Select Assessment Numbers" />}
+                renderValue={(selected) => selected.join(', ')}
+              >
+                <MenuItem value="all">
+                  <Checkbox
+                    checked={selectedAssessments.length === getAssessmentsByGisId(selectedGisId).length}
+                    indeterminate={
+                      selectedAssessments.length > 0 &&
+                      selectedAssessments.length < getAssessmentsByGisId(selectedGisId).length
+                    }
+                  />
+                  <ListItemText primary="Select All" />
+                </MenuItem>
+                {getAssessmentsByGisId(selectedGisId).map((assessment) => (
+                  <MenuItem key={assessment} value={assessment}>
+                    <Checkbox checked={selectedAssessments.indexOf(assessment) > -1} />
+                    <ListItemText primary={assessment} />
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
+
+          {selectedAssessments.length > 0 && !showNewGisInput && (
+            <Button
+              fullWidth
+              variant="contained"
+              sx={{ mt: 2 }}
+              onClick={() => setShowNewGisInput(true)}
+            >
+              Enter New GIS ID
+            </Button>
+          )}
+          
+          {showNewGisInput && (
+            <FormControl fullWidth sx={{ mt: 2 }}>
+              <InputLabel>New GIS ID</InputLabel>
+              <OutlinedInput
+                value={newGisId}
+                onChange={(e) => setNewGisId(e.target.value)}
+                label="New GIS ID"
+              />
+            </FormControl>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseGisDialog}>Cancel</Button>
+          {showNewGisInput && newGisId && (
+            <Button onClick={handleUpdateGisId} variant="contained">
+              Update GIS ID
+            </Button>
+          )}
         </DialogActions>
       </Dialog>
     </>

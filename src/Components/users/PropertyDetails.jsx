@@ -736,22 +736,47 @@ function PropertyDetails() {
   };
 
   const gotomap = () => {
-    // Get the current directory path
-    const currentPath = window.location.pathname;
-    const basePath = window.location.origin;
-    
-    // Construct the path to the Gis_finder/index.html file
-    const mapUrl = `${basePath}/Gis_finder/index.html`;
-    
-    // Window features for the popup
-    const windowFeatures = "width=1000,height=800,left=200,top=100,resizable=yes,scrollbars=yes";
-    
-    // Open in a new window/tab
-    window.open(mapUrl, "GISFinder", windowFeatures);
+    setOpenMapDialog(true);
   };
 
-   // Function to handle the open dialog action
-   const handleOpenDialog = () => {
+  const handleCloseMapDialog = () => {
+    setOpenMapDialog(false);
+    setSelectedMapWard('');
+  };
+
+  const handleWardSelect = () => {
+    if (selectedMapWard) {
+      const selectedWardOption = wardMapOptions.find(w => w.value === selectedMapWard);
+      const wardPath = `/Gis_finder_ward_${selectedWardOption.displayValue}/index.html`;
+      const mapWindow = window.open(wardPath, '_blank', 'width=1000,height=800,left=200,top=100');
+      
+      // Add event listener for messages from the map window
+      window.addEventListener('message', function(event) {
+        if (event.data.type === 'GISID_SELECTED') {
+          const selectedGISID = event.data.gisId;
+          // Format the GIS ID with ward number and hyphen
+          const formattedGisId = `${selectedWardOption.displayValue}-${selectedGISID}`;
+          setGisId(formattedGisId); // Set the formatted GIS ID
+          setGisIdSource('map');
+          setSelectedGisInfo(`Ward ${selectedWardOption.displayValue} - ${selectedGISID}`);
+          message.success(`Selected GIS ID: ${formattedGisId} from Ward ${selectedWardOption.displayValue}`);
+        }
+      }, false);
+      
+      handleCloseMapDialog();
+    }
+  };
+
+  const [openMapDialog, setOpenMapDialog] = useState(false);
+  const [selectedMapWard, setSelectedMapWard] = useState('');
+
+  const wardMapOptions = [
+    { value: '01', label: 'Ward 01', displayValue: '01' },
+    { value: '36', label: 'Ward 36', displayValue: '36' }
+  ];
+
+  // Function to handle the open dialog action
+  const handleOpenDialog = () => {
     setOpenDialog(true);
   };
 
@@ -916,17 +941,17 @@ function PropertyDetails() {
   // Define fetchGisIds inside the component
   const fetchGisIds = async () => {
     try {
-     const response = await fetch('https://luisnellai.xyz/siraj/getGisIds.php', {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0'
-      },
-      credentials: 'omit' // Important for CORS
-    });
+      const response = await fetch('https://luisnellai.xyz/siraj/getGisIds.php', {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        },
+        credentials: 'omit'
+      });
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -935,24 +960,127 @@ function PropertyDetails() {
       const data = await response.json();
       
       if (data.success) {
-        return data.gisIds;
+        // Store surveyor submitted GIS IDs
+        localStorage.setItem('surveyor_submitted_01_gisId', 
+          JSON.stringify(data.surveyor_submitted.ward01)
+        );
+        localStorage.setItem('surveyor_submitted_36_gisId', 
+          JSON.stringify(data.surveyor_submitted.ward36)
+        );
+
+        // Store verified GIS IDs
+        localStorage.setItem('verify_reviewed_01_gisId', 
+          JSON.stringify(data.verified.ward01)
+        );
+        localStorage.setItem('verify_reviewed_36_gisId', 
+          JSON.stringify(data.verified.ward36)
+        );
+
+        // Store admin verified GIS IDs
+        localStorage.setItem('admin_reviewed_01_gisId', 
+          JSON.stringify(data.admin_verified.ward01)
+        );
+        localStorage.setItem('admin_reviewed_36_gisId', 
+          JSON.stringify(data.admin_verified.ward36)
+        );
+
+        // Store super admin verified GIS IDs
+        localStorage.setItem('sadmin_reviewed_01_gisId', 
+          JSON.stringify(data.sadmin_verified.ward01)
+        );
+        localStorage.setItem('sadmin_reviewed_36_gisId', 
+          JSON.stringify(data.sadmin_verified.ward36)
+        );
+
+        // Return all data
+        return {
+          surveyorSubmitted: {
+            ward01: data.surveyor_submitted.ward01,
+            ward36: data.surveyor_submitted.ward36
+          },
+          verified: {
+            ward01: data.verified.ward01,
+            ward36: data.verified.ward36
+          },
+          adminVerified: {
+            ward01: data.admin_verified.ward01,
+            ward36: data.admin_verified.ward36
+          },
+          sadminVerified: {
+            ward01: data.sadmin_verified.ward01,
+            ward36: data.sadmin_verified.ward36
+          }
+        };
       } else {
         console.error('Failed to fetch GIS IDs:', data.message);
-        return [];
+        return {
+          surveyorSubmitted: { ward01: [], ward36: [] },
+          verified: { ward01: [], ward36: [] },
+          adminVerified: { ward01: [], ward36: [] },
+          sadminVerified: { ward01: [], ward36: [] }
+        };
       }
     } catch (error) {
       console.error('Error fetching GIS IDs:', error);
+      return {
+        surveyorSubmitted: { ward01: [], ward36: [] },
+        verified: { ward01: [], ward36: [] },
+        adminVerified: { ward01: [], ward36: [] },
+        sadminVerified: { ward01: [], ward36: [] }
+      };
+    }
+  };
+
+  // Helper function to get GIS IDs from localStorage with specific naming
+  const getGisIdsFromStorage = (type, ward) => {
+    try {
+      const key = `${type}_reviewed_${ward}_gisId`;
+      // For surveyor submitted, use different naming convention
+      const storageKey = type === 'surveyor' ? 
+        `surveyor_submitted_${ward}_gisId` : key;
+      
+      const storedData = localStorage.getItem(storageKey);
+      if (storedData) {
+        return JSON.parse(storedData);
+      }
+      return [];
+    } catch (error) {
+      console.error(`Error getting ${type} GIS IDs for ward ${ward} from localStorage:`, error);
       return [];
     }
   };
 
-  // Update useEffect to use the simplified fetchGisIds
+  // Usage example:
   useEffect(() => {
-    fetchGisIds().then(gisIds => {
-      // Store the GIS IDs in localStorage
-      localStorage.setItem('submittedGisIds', JSON.stringify(gisIds));
-    });
-  }, []); // Empty dependency array means this runs once when component mounts
+    const initializeGisIds = async () => {
+      const allGisIds = await fetchGisIds();
+      
+      // You can now access the GIS IDs from localStorage like this:
+      const surveyorGisIds01 = getGisIdsFromStorage('surveyor', '01');
+      const surveyorGisIds36 = getGisIdsFromStorage('surveyor', '36');
+      
+      const verifiedGisIds01 = getGisIdsFromStorage('verify', '01');
+      const verifiedGisIds36 = getGisIdsFromStorage('verify', '36');
+      
+      const adminGisIds01 = getGisIdsFromStorage('admin', '01');
+      const adminGisIds36 = getGisIdsFromStorage('admin', '36');
+      
+      const sadminGisIds01 = getGisIdsFromStorage('sadmin', '01');
+      const sadminGisIds36 = getGisIdsFromStorage('sadmin', '36');
+
+      // Use the GIS IDs as needed
+      console.log('Surveyor GIS IDs Ward 01:', surveyorGisIds01);
+      console.log('Surveyor GIS IDs Ward 36:', surveyorGisIds36);
+      console.log('Verified GIS IDs Ward 01:', verifiedGisIds01);
+      console.log('Verified GIS IDs Ward 36:', verifiedGisIds36);
+      console.log('Admin Verified GIS IDs Ward 01:', adminGisIds01);
+      console.log('Admin Verified GIS IDs Ward 36:', adminGisIds36);
+      console.log('Super Admin Verified GIS IDs Ward 01:', sadminGisIds01);
+      console.log('Super Admin Verified GIS IDs Ward 36:', sadminGisIds36);
+    };
+
+    initializeGisIds();
+  }, []);
 
   // Add this to your existing state declarations
   const [profTaxOptions, setProfTaxOptions] = useState([]);
@@ -997,6 +1125,9 @@ function PropertyDetails() {
 
     fetchProfTaxNumbers();
   }, []); // Empty dependency array means this runs once on component mount
+
+  // Add this new state to track the selected GIS info
+  const [selectedGisInfo, setSelectedGisInfo] = useState('');
 
   return (
     <div>
@@ -1101,10 +1232,21 @@ function PropertyDetails() {
                       variant="outlined"
                       InputProps={{
                         endAdornment: gisIdSource === 'map' ? (
-                          <span style={{ color: 'green', fontSize: '0.8rem' }}>
-                            ✓ From Map
-                          </span>
-                        ) : null,
+                          <Box sx={{ 
+                            display: 'flex', 
+                            alignItems: 'center',
+                            color: 'green',
+                            fontSize: '0.8rem',
+                            '& > span': {
+                              backgroundColor: '#e8f5e9',
+                              padding: '4px 8px',
+                              borderRadius: '4px',
+                              whiteSpace: 'nowrap'
+                            }
+                          }}>
+                            <span>✓ From Map</span>
+                          </Box>
+                        ) : null
                       }}
                     />
                   </FormControl>
@@ -1362,7 +1504,7 @@ function PropertyDetails() {
                     label="Name of Assessee"
                     variant="outlined"
                     value={selectedOwner}
-                    onChange={(e, newValue) => setSelectedOwner(e.target.value)}
+                    onChange={(e, newValue) => setSelectedOwner(newValue)}
                   />
                                         
                 </FormControl>
@@ -1919,6 +2061,91 @@ function PropertyDetails() {
           </Row>
         </Box>
       </Container>
+      <Dialog 
+        open={openMapDialog} 
+        onClose={handleCloseMapDialog}
+        maxWidth="md" // Makes dialog wider
+        fullWidth={true} // Takes up maximum width defined by maxWidth
+        PaperProps={{
+          style: {
+            minHeight: '60vh', // Makes dialog taller
+            padding: '20px', // Adds padding inside dialog
+            borderRadius: '10px' // Rounds the corners
+          }
+        }}
+      >
+        <DialogTitle 
+          sx={{
+            textAlign: 'center',
+            fontSize: '24px',
+            fontWeight: 'bold',
+            borderBottom: '1px solid #eee',
+            padding: '20px'
+          }}
+        >
+          Select Ward to View Map
+        </DialogTitle>
+        <DialogContent sx={{ padding: '40px 20px' }}>
+          <Typography sx={{ mb: 3 }}>
+            Please select a ward to view its corresponding map:
+          </Typography>
+          <FormControl fullWidth sx={{ mt: 2 }}>
+            <InputLabel>Ward</InputLabel>
+            <Select
+              value={selectedMapWard}
+              onChange={(e) => setSelectedMapWard(e.target.value)}
+              label="Ward"
+              sx={{ 
+                minHeight: '50px',
+                fontSize: '16px'
+              }}
+            >
+              {wardMapOptions.map((ward) => (
+                <MenuItem 
+                  key={ward.value} 
+                  value={ward.value}
+                  sx={{ 
+                    fontSize: '16px',
+                    padding: '15px'
+                  }}
+                >
+                  {ward.label}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions sx={{ 
+          padding: '20px',
+          borderTop: '1px solid #eee',
+          justifyContent: 'center',
+          gap: '20px'
+        }}>
+          <Button 
+            onClick={handleCloseMapDialog} 
+            color="secondary"
+            variant="outlined"
+            sx={{ 
+              minWidth: '120px',
+              height: '45px'
+            }}
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleWardSelect} 
+            color="primary"
+            variant="contained"
+            disabled={!selectedMapWard}
+            sx={{ 
+              minWidth: '120px',
+              height: '45px'
+            }}
+          >
+            Open Map
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }

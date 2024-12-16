@@ -90,6 +90,9 @@ const Home = () => {
           <MenuItem value="/sadmin_login">Super Admin Login</MenuItem>
           <MenuItem value="/fadadmin_login">ATE Admin Login</MenuItem>
           <MenuItem value="/vfa_admin_login">ATCR Admin Login</MenuItem>
+          <MenuItem value="/verification">Verification Login</MenuItem>
+          <MenuItem value="/admin_verification">Admin Verification Login</MenuItem>
+          <MenuItem value="/sadmin_verification">Super Admin Verification Login</MenuItem>
         </Select>
       </FormControl>
       {/* <Box

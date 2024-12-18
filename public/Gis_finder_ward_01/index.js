@@ -1,7 +1,6 @@
 var container = document.getElementById('popup');
 var content = document.getElementById('popup-content');
 var closer = document.getElementById('popup-closer');
-
 closer.onclick = function() {
     container.style.display = 'none';
     closer.blur();
@@ -68,7 +67,8 @@ var map = new ol.Map({
     view: view
 });
 
-var originalExtent = [8560234.043578, 1234399.643779, 8563649.882101, 1236292.160363];
+var originalExtent = [8562400.154726, 1239705.308913, 8565992.009201, 1241694.894130];
+
 map.getView().fit(originalExtent, {
     size: map.getSize(),
     maxZoom: 8
@@ -76,22 +76,22 @@ map.getView().fit(originalExtent, {
 
 var currentInteraction;
 
-var surveyor_submitted_36_gisId = new Set();
+var surveyor_submitted_01_gisId = new Set();
 
 function isGisIdSubmitted(gisId) {
-    return surveyor_submitted_36_gisId.has(gisId);
+    return surveyor_submitted_01_gisId.has(gisId);
 }
 
 window.updateSubmittedGisId = function(gisId) {
-    surveyor_submitted_36_gisId.add(gisId);
+    surveyor_submitted_01_gisId.add(gisId);
     lyr_building_ppt.changed();
 };
 
 window.addEventListener('load', function() {
     try {
-        const storedGisIds = JSON.parse(localStorage.getItem('surveyor_submitted_36_gisId') || '[]');
+        const storedGisIds = JSON.parse(localStorage.getItem('surveyor_submitted_01_gisId') || '[]');
         storedGisIds.forEach(gisId => {
-            surveyor_submitted_36_gisId.add(gisId);
+            surveyor_submitted_01_gisId.add(gisId);
             window.updateBuildingColor(gisId, 'rgba(0,255,0,0.8)');
         });
         lyr_building_ppt.changed();
@@ -108,16 +108,7 @@ var popupEventTriggered = function(evt) {
     var popupTexts = [];
     var currentFeature;
     var allLayers = getAllNonBaseLayers();
-
-    // Zoom to the clicked location
-    if (coord) {
-        map.getView().animate({
-            center: coord,
-            zoom: 16, // Adjust the zoom level as needed
-            duration: 1000 // Smooth animation duration in milliseconds
-        });
-    }
-
+    
     map.forEachFeatureAtPixel(pixel, function(feature, layer) {
         feature = decluster(feature);
         if (feature) {
@@ -136,8 +127,7 @@ var popupEventTriggered = function(evt) {
                         var value = feature.get(featureKeys[i]);
                         if (value) {
                             popupDef = popupDef.split("[" + featureKeys[i] + "]").join(
-                                String(feature.get(featureKeys[i]))
-                            )
+                                String(feature.get(featureKeys[i])))
                         } else {
                             popupDef = popupDef.split("[" + featureKeys[i] + "]").join("NULL")
                         }
@@ -148,6 +138,56 @@ var popupEventTriggered = function(evt) {
         }
     });
 
+    var geojsonFormat = new ol.format.GeoJSON();
+    var len = allLayers.length;
+    for (var i = 0; i < len; i++) {
+        var layer = allLayers[i];
+        if (layer.getSource() instanceof ol.source.TileWMS) {
+            var popupDef = popupLayers[allLayers.indexOf(layer)];
+            if (popupDef == "#AllAttributes") {
+                var url = layer.getSource().getGetFeatureInfoUrl(
+                    evt.coordinate,
+                    map.getView().getResolution(),
+                    map.getView().getProjection(), {
+                        'INFO_FORMAT': 'text/plain'
+                    }
+                );
+                $.get(url, {}, function(data) {
+                    popupTexts.push(data);
+                });
+            } else if (popupDef !== "") {
+                var url = layer.getSource().getGetFeatureInfoUrl(
+                    evt.coordinate,
+                    map.getView().getResolution(),
+                    map.getView().getProjection(), {
+                        'INFO_FORMAT': 'application/json'
+                    }
+                );
+                $.ajax({
+                    url: url,
+                    success: function(data) {
+                        var features = geojsonFormat.readFeatures(data);
+                        for (var f = 0; f < feature.length; f++) {
+                            var feature = features[f];
+                            var values = feature.getProperties();
+                            for (var key in values) {
+                                if (key != 'geometry') {
+                                    var value = values[key];
+                                    if (value) {
+                                        popupDef = popupDef.split("[" + key + "]").join(
+                                            String(value));
+                                    } else {
+                                        popupDef = popupDef.split("[" + key + "]").join("NULL");
+                                    }
+                                }
+                            }
+                            popupTexts.push(popupDef);
+                        }
+                    }
+                });
+            }
+        }
+    }
     if (popupTexts.length) {
         overlayPopup.setPosition(coord);
         const selectButton = '<br><button onclick="selectAndClose()" class="btn btn-primary btn-sm">Select Property</button>';

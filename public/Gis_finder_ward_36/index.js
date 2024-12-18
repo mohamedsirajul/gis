@@ -107,7 +107,7 @@ var popupEventTriggered = function(evt) {
     var popupTexts = [];
     var currentFeature;
     var allLayers = getAllNonBaseLayers();
-    
+
     map.forEachFeatureAtPixel(pixel, function(feature, layer) {
         feature = decluster(feature);
         if (feature) {

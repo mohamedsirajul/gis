@@ -772,7 +772,8 @@ function PropertyDetails() {
 
   const wardMapOptions = [
     { value: '01', label: 'Ward 01', displayValue: '01' },
-    { value: '36', label: 'Ward 36', displayValue: '36' }
+    { value: '36', label: 'Ward 36', displayValue: '36' },
+    { value: '35', label: 'Ward 35', displayValue: '35' }
   ];
 
   // Function to handle the open dialog action
@@ -967,6 +968,11 @@ function PropertyDetails() {
         localStorage.setItem('surveyor_submitted_36_gisId', 
           JSON.stringify(data.surveyor_submitted.ward36)
         );
+        
+        localStorage.setItem('surveyor_submitted_35_gisId', 
+          JSON.stringify(data.surveyor_submitted.ward35)
+        );
+
 
         // Store verified GIS IDs
         localStorage.setItem('verify_reviewed_01_gisId', 
@@ -974,6 +980,10 @@ function PropertyDetails() {
         );
         localStorage.setItem('verify_reviewed_36_gisId', 
           JSON.stringify(data.verified.ward36)
+        );
+
+        localStorage.setItem('verify_reviewed_35_gisId', 
+          JSON.stringify(data.verified.ward35)
         );
 
         // Store admin verified GIS IDs
@@ -984,12 +994,20 @@ function PropertyDetails() {
           JSON.stringify(data.admin_verified.ward36)
         );
 
+        localStorage.setItem('admin_reviewed_35_gisId', 
+          JSON.stringify(data.admin_verified.ward35)
+        );
+
         // Store super admin verified GIS IDs
         localStorage.setItem('sadmin_reviewed_01_gisId', 
           JSON.stringify(data.sadmin_verified.ward01)
         );
         localStorage.setItem('sadmin_reviewed_36_gisId', 
           JSON.stringify(data.sadmin_verified.ward36)
+        );
+
+        localStorage.setItem('sadmin_reviewed_35_gisId', 
+          JSON.stringify(data.sadmin_verified.ward35)
         );
 
         // Return all data
